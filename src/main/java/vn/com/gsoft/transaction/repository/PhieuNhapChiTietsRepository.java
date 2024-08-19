@@ -34,7 +34,8 @@ public interface PhieuNhapChiTietsRepository extends BaseRepository<PhieuNhapChi
           + " AND (:#{#param.nhaThuocMaNhaThuoc} IS NULL OR c.nhaThuoc_MaNhaThuoc = :#{#param.nhaThuocMaNhaThuoc})"
           + " AND (:#{#param.warnDate} IS NULL OR (c.hanDung IS NOT NULL AND c.hanDung <= :#{#param.warnDate}))"
           + " AND c.remainRefQuantity > 0"
-          + " AND c.recordStatusId = 0"
+          + " AND c.recordStatusId = :#{#param.recordStatusId}"
+          + " AND (:#{#param.hangLuanChuyen} IS NULL OR c.hangLuanChuyen = :#{#param.hangLuanChuyen})"
           + " ORDER BY c.createdDate desc"
   )
   Page<PhieuNhapChiTiets> searchPageHangCanHan(@Param("param") PhieuNhapChiTietsReq param, Pageable pageable);
@@ -45,8 +46,11 @@ public interface PhieuNhapChiTietsRepository extends BaseRepository<PhieuNhapChi
           + " AND (:#{#param.nhaThuocMaNhaThuoc} IS NULL OR c.nhaThuoc_MaNhaThuoc = :#{#param.nhaThuocMaNhaThuoc})"
           + " AND (:#{#param.warnDate} IS NULL OR c.createdDate <= :#{#param.warnDate})"
           + " AND c.remainRefQuantity > 0"
-          + " AND c.recordStatusId = 0"
+          + " AND c.recordStatusId = :#{#param.recordStatusId}"
+          + " AND (:#{#param.hangLuanChuyen} IS NULL OR c.hangLuanChuyen = :#{#param.hangLuanChuyen})"
           + " ORDER BY c.createdDate desc"
   )
   Page<PhieuNhapChiTiets> searchPageHangItGiaoDich(@Param("param") PhieuNhapChiTietsReq param, Pageable pageable);
+
+  PhieuNhapChiTiets findByMaPhieuNhapCt(Integer maPhieuNhapCt);
 }

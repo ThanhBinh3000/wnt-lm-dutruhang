@@ -26,7 +26,7 @@ public class PhieuNhapChiTiets extends BaseEntity {
     @Column(name = "NhaThuoc_MaNhaThuoc")
     private String nhaThuoc_MaNhaThuoc;
     @Column(name = "Thuoc_ThuocId")
-    private Long thuocThuocId;
+    private Integer thuocThuocId;
     @Column(name = "DonViTinh_MaDonViTinh")
     private Integer donViTinhMaDonViTinh;
     @Column(name = "ChietKhau")
@@ -111,11 +111,15 @@ public class PhieuNhapChiTiets extends BaseEntity {
     private String storageConditions;
     @Column(name = "CreatedDate")
     private Date createdDate;
+    @Column(name = "HangLuanChuyen")
+    private Boolean hangLuanChuyen;
     @Transient
     private String tenThuoc;
     @Transient
     private String tenDonVi;
     @Transient
     private Integer thuocDMCId;
+    @Transient
+    private Integer LoaiHang;
 }
 

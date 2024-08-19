@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import vn.com.gsoft.transaction.model.dto.PhieuNhapChiTietsReq;
 import vn.com.gsoft.transaction.model.system.PaggingReq;
-import vn.com.gsoft.transaction.service.LuanChuyenHangService;
+import vn.com.gsoft.transaction.service.LuanChuyenService;
 
 @SpringBootTest
 @Slf4j
 class TestData {
     @Autowired
-    private LuanChuyenHangService luanChuyenHangService;
+    private LuanChuyenService luanChuyenHangService;
     @Test
     void getData() throws Exception {
         PhieuNhapChiTietsReq req = new PhieuNhapChiTietsReq();
