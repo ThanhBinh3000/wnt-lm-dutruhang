@@ -11,15 +11,15 @@ import vn.com.gsoft.transaction.service.LuanChuyenService;
 @SpringBootTest
 @Slf4j
 class TestData {
-    @Autowired
-    private LuanChuyenService luanChuyenHangService;
-    @Test
-    void getData() throws Exception {
-        PhieuNhapChiTietsReq req = new PhieuNhapChiTietsReq();
-        PaggingReq paggingReq = new PaggingReq();
-        paggingReq.setPage(0);
-        paggingReq.setLimit(10);
-        req.setPaggingReq(paggingReq);
-    luanChuyenHangService.searchListHangCanHan(req);
-    }
+//    @Autowired
+//    private LuanChuyenService luanChuyenHangService;
+//    @Test
+//    void getData() throws Exception {
+//        PhieuNhapChiTietsReq req = new PhieuNhapChiTietsReq();
+//        PaggingReq paggingReq = new PaggingReq();
+//        paggingReq.setPage(0);
+//        paggingReq.setLimit(10);
+//        req.setPaggingReq(paggingReq);
+//    luanChuyenHangService.searchListHangCanHan(req);
+//    }
 }

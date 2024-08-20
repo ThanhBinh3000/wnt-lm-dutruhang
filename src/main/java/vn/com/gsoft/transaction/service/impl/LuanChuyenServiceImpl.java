@@ -9,15 +9,19 @@ import org.springframework.stereotype.Service;
 import vn.com.gsoft.transaction.constant.LoaiHangContains;
 import vn.com.gsoft.transaction.constant.RecordStatusContains;
 import vn.com.gsoft.transaction.entity.PhieuNhapChiTiets;
+import vn.com.gsoft.transaction.entity.PhieuNhaps;
 import vn.com.gsoft.transaction.entity.Thuocs;
 import vn.com.gsoft.transaction.model.dto.PhieuNhapChiTietsReq;
 import vn.com.gsoft.transaction.model.system.Profile;
 import vn.com.gsoft.transaction.repository.DonViTinhsRepository;
 import vn.com.gsoft.transaction.repository.PhieuNhapChiTietsRepository;
+import vn.com.gsoft.transaction.repository.PhieuNhapsRepository;
 import vn.com.gsoft.transaction.repository.ThuocsRepository;
 import vn.com.gsoft.transaction.service.LuanChuyenService;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -29,20 +33,25 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
     private ThuocsRepository thuocsRepository;
     @Autowired
     private DonViTinhsRepository donViTinhsRepository;
+    @Autowired
+    private PhieuNhapsRepository phieuNhapsRepository;
 
     @Autowired
     public LuanChuyenServiceImpl(PhieuNhapChiTietsRepository hdrRepo
                                      , ThuocsRepository thuocsRepository
                                      , DonViTinhsRepository donViTinhsRepository
+                                     , PhieuNhapsRepository phieuNhapsRepository
+
     ) {
         super(hdrRepo);
         this.hdrRepo = hdrRepo;
         this.thuocsRepository = thuocsRepository;
         this.donViTinhsRepository = donViTinhsRepository;
+        this.phieuNhapsRepository = phieuNhapsRepository;
     }
 
     @Override
-    public Page<PhieuNhapChiTiets> searchListHangCanHan(PhieuNhapChiTietsReq req) throws Exception {
+    public Page<PhieuNhapChiTiets> searchPageHangCanHan(PhieuNhapChiTietsReq req) throws Exception {
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
@@ -61,21 +70,29 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
             if(thuoc.isPresent()) {
                x.setTenThuoc(thuoc.get().getTenThuoc());
                x.setThuocDMCId(thuoc.get().getGroupIdMapping());
+               x.setSoDangKy(thuoc.get().getRegisteredNo());
+               x.setMaThuoc(thuoc.get().getMaThuoc());
             }
             var donViTinh = donViTinhsRepository.findByMaDonViTinh(x.getDonViTinhMaDonViTinh());
             donViTinh.ifPresent(donViTinhs -> x.setTenDonVi(donViTinhs.getTenDonViTinh()));
             x.setLoaiHang(LoaiHangContains.CAN_HAN);
+            Optional<PhieuNhaps> pn = phieuNhapsRepository.findById(x.getPhieuNhapMaPhieuNhap());
+            if(pn.isPresent()) {
+                x.setNgayNhap(pn.get().getNgayNhap());
+                x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
+            }
         });
 
         return dsCanHan;
     }
 
     @Override
-    public Page<PhieuNhapChiTiets> searchListHangItGiaoDich(PhieuNhapChiTietsReq req) throws Exception {
+    public Page<PhieuNhapChiTiets> searchPageHangItGiaoDich(PhieuNhapChiTietsReq req) throws Exception {
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
         //lấy ra danh sách hàng cận hạn
+        var curentDate = new Date();
         Calendar warnDate = Calendar.getInstance();
         warnDate.add(Calendar.MONTH, -6);
         req.setNhaThuocMaNhaThuoc(userInfo.getMaCoSo());
@@ -90,10 +107,21 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
             if(thuoc.isPresent()) {
                 x.setTenThuoc(thuoc.get().getTenThuoc());
                 x.setThuocDMCId(thuoc.get().getGroupIdMapping());
+                x.setSoDangKy(thuoc.get().getRegisteredNo());
+                x.setMaThuoc(thuoc.get().getMaThuoc());
             }
             var donViTinh = donViTinhsRepository.findByMaDonViTinh(x.getDonViTinhMaDonViTinh());
             donViTinh.ifPresent(donViTinhs -> x.setTenDonVi(donViTinhs.getTenDonViTinh()));
             x.setLoaiHang(LoaiHangContains.IT_GIAO_DICH);
+            Optional<PhieuNhaps> pn = phieuNhapsRepository.findById(x.getPhieuNhapMaPhieuNhap());
+            if(pn.isPresent()) {
+                x.setNgayNhap(pn.get().getNgayNhap());
+                x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
+            }
+            //tính ngày
+            long day = ChronoUnit.DAYS.between(x.getNgayNhap().toInstant(), curentDate.toInstant());
+            x.setSoNgayKhongGiaoDich(day);
+
         });
 
         return dsCanHan;
