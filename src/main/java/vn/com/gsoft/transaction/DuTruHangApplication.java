@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableFeignClients
-public class TransactionApplication {
+public class DuTruHangApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TransactionApplication.class, args);
+        SpringApplication.run(DuTruHangApplication.class, args);
     }
 }

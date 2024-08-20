@@ -8,6 +8,7 @@ import vn.com.gsoft.transaction.constant.BaoCaoContains;
 import vn.com.gsoft.transaction.constant.LimitPageConstant;
 import vn.com.gsoft.transaction.entity.*;
 import vn.com.gsoft.transaction.model.dto.GiaoDichHangHoaReq;
+import vn.com.gsoft.transaction.model.dto.HangDuTruRes;
 import vn.com.gsoft.transaction.model.dto.TopMatHangRes;
 import vn.com.gsoft.transaction.model.system.Profile;
 import vn.com.gsoft.transaction.repository.*;
@@ -124,7 +125,7 @@ public class GiaoDichHangHoaServiceImpl extends BaseServiceImpl<GiaoDichHangHoa,
     }
 
     @Override
-    public List<TopMatHangRes> topSoLuongBanChay(GiaoDichHangHoaReq req) throws Exception{
+    public List<HangDuTruRes> topSoLuongBanChay(GiaoDichHangHoaReq req) throws Exception{
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
@@ -146,69 +147,32 @@ public class GiaoDichHangHoaServiceImpl extends BaseServiceImpl<GiaoDichHangHoa,
                 items.addAll(listArchive);
             }
         }
-        List<TopMatHangRes> data = new ArrayList<>();
-        if(req.getLoaiBaoCao().equals(BaoCaoContains.MAT_HANG)){
-            data = items.stream()
-                    .collect(Collectors.groupingBy(
-                            GiaoDichHangHoa::getThuocId,
-                            Collectors.collectingAndThen(
-                                    Collectors.toList(),
-                                    x -> {
-                                        if (x.isEmpty()) {
-                                            return null;
-                                        }
-                                        var duLieuCoSo =  x.stream().filter(item->item.getMaCoSo().equals(userInfo.getMaCoSo()));
-                                        BigDecimal slSoCoSo = BigDecimal.valueOf(0);
-
-                                        if(!duLieuCoSo.isParallel()){
-                                            slSoCoSo = duLieuCoSo.map(item-> item.getSoLuong()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                        }
-                                        return new TopMatHangRes(
-                                                x.get(0).getTenThuoc(),
-                                                x.get(0).getTenNhomThuoc(),
-                                                x.get(0).getTenDonVi(),
-                                                x.stream().map(item->item.getSoLuong()).reduce(BigDecimal.ZERO, BigDecimal::add),
-                                                slSoCoSo
-                                        );
+        List<HangDuTruRes> data = new ArrayList<>();
+        data = items.stream()
+                .collect(Collectors.groupingBy(
+                        GiaoDichHangHoa::getThuocId,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                x -> {
+                                    if (x.isEmpty()) {
+                                        return null;
                                     }
-                            )
-                    ))
-                    .values().stream()
-                    .sorted((g1, g2) -> g2.getSoLieuThiTruong().compareTo(g1.getSoLieuThiTruong()))
-                    .limit(req.getPageSize())
-                    .collect(Collectors.toList());
-        }else if(req.getLoaiBaoCao().equals(BaoCaoContains.NHOM_HANG)){
-            data = items.stream()
-                    .collect(Collectors.groupingBy(
-                            GiaoDichHangHoa::getNhomThuocId,
-                            Collectors.collectingAndThen(
-                                    Collectors.toList(),
-                                    x -> {
-                                        if (x.isEmpty()) {
-                                            return null;
-                                        }
-                                        var duLieuCoSo =  x.stream().filter(item->item.getMaCoSo().equals(userInfo.getMaCoSo()));
-                                        BigDecimal slSoCoSo = BigDecimal.valueOf(0);
-
-                                        if(!duLieuCoSo.isParallel()){
-                                            slSoCoSo = duLieuCoSo.map(item-> item.getSoLuong()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                                        }
-                                        return new TopMatHangRes(
-                                                x.get(0).getTenThuoc(),
-                                                x.get(0).getTenNhomThuoc(),
-                                                x.get(0).getTenDonVi(),
-                                                x.stream().map(item->item.getSoLuong()).reduce(BigDecimal.ZERO, BigDecimal::add),
-                                                slSoCoSo
-                                        );
-                                    }
-                            )
-                    ))
-                    .values().stream()
-                    .sorted((g1, g2) -> g2.getSoLieuThiTruong().compareTo(g1.getSoLieuThiTruong()))
-                    .limit(req.getPageSize())
-                    .collect(Collectors.toList());
-        }
-
+                                    return new HangDuTruRes(
+                                            x.get(0).getThuocId(),
+                                            x.get(0).getTenThuoc(),
+                                            x.get(0).getTenNhomThuoc(),
+                                            x.get(0).getTenDonVi(),
+                                            x.get(0).getGiaNhap(),
+                                            BigDecimal.ONE,
+                                            x.stream().map(GiaoDichHangHoa::getSoLuong).reduce(BigDecimal.ZERO, BigDecimal::add)
+                                    );
+                                }
+                        )
+                ))
+                .values().stream()
+                .sorted((g1, g2) -> g2.getSoLieuThiTruong().compareTo(g1.getSoLieuThiTruong()))
+                .limit(req.getPageSize())
+                .collect(Collectors.toList());
         return data;
     }
 
