@@ -22,12 +22,12 @@ public class LuanChuyenController {
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-can-han", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageHangCanHan(@RequestBody PhieuNhapChiTietsReq objReq) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.searchListHangCanHan(objReq)));
+        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageHangCanHan(objReq)));
     }
 
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-it-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageHangItGiaoDich(@RequestBody PhieuNhapChiTietsReq objReq) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.searchListHangItGiaoDich(objReq)));
+        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageHangItGiaoDich(objReq)));
     }
 }

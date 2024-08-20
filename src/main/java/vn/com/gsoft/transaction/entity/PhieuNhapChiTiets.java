@@ -2,14 +2,12 @@ package vn.com.gsoft.transaction.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
@@ -120,6 +118,17 @@ public class PhieuNhapChiTiets extends BaseEntity {
     @Transient
     private Integer thuocDMCId;
     @Transient
-    private Integer LoaiHang;
+    private Integer loaiHang;
+    @Transient
+    private Integer soPhieuNhap;
+    @Transient
+    private Date ngayNhap;
+    @Transient
+    private String soDangKy;
+    @Transient
+    private String maThuoc;
+    @Transient
+    private Long soNgayKhongGiaoDich;
+
 }
 
