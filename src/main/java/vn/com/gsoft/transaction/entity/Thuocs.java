@@ -240,5 +240,7 @@ public class Thuocs {
     private Long userIdConfirm;
     @Column(name = "UserIdMapping")
     private Long userIdMapping;
+    @Column(name = "RecordStatusID")
+    private Long recordStatusID;
 }
 

@@ -2,35 +2,38 @@ package vn.com.gsoft.transaction.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PhieuNhapChiTiets")
-public class PhieuNhapChiTiets extends BaseEntity {
+@Table(name = "PhieuXuatChiTiets")
+public class PhieuXuatChiTiets {
     @Id
-    @Column(name = "MaPhieuNhapCt")
+    @Column(name = "MaPhieuXuatCt")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer maPhieuNhapCt;
-    @Column(name = "PhieuNhap_MaPhieuNhap")
-    private Long phieuNhapMaPhieuNhap;
+    private Long id;
+    @Column(name = "PhieuXuat_MaPhieuXuat")
+    private Long phieuXuatMaPhieuXuat;
     @Column(name = "NhaThuoc_MaNhaThuoc")
-    private String nhaThuoc_MaNhaThuoc;
+    private String nhaThuocMaNhaThuoc;
     @Column(name = "Thuoc_ThuocId")
     private Long thuocThuocId;
     @Column(name = "DonViTinh_MaDonViTinh")
-    private Integer donViTinhMaDonViTinh;
+    private Long donViTinhMaDonViTinh;
     @Column(name = "ChietKhau")
-    private BigDecimal chietKhau;
-    @Column(name = "GiaNhap")
-    private BigDecimal giaNhap;
+    private Double chietKhau;
+    @Column(name = "GiaXuat")
+    private Double giaXuat;
     @Column(name = "SoLuong")
     private BigDecimal soLuong;
     @Column(name = "Option1")
@@ -39,20 +42,14 @@ public class PhieuNhapChiTiets extends BaseEntity {
     private String option2;
     @Column(name = "Option3")
     private String option3;
-    @Column(name = "Option4")
-    private String option4;
-    @Column(name = "Option5")
-    private String option5;
-    @Column(name = "SoLo")
-    private String soLo;
-    @Column(name = "HanDung")
-    private Date hanDung;
-    @Column(name = "RemainRefQuantity")
-    private Double remainRefQuantity;
+    @Column(name = "RefConnectivityCode")
+    private String refConnectivityCode;
+    @Column(name = "PreQuantity")
+    private String preQuantity;
+    @Column(name = "IsReceiptDrugPriceRefGenerated")
+    private Boolean isReceiptDrugPriceRefGenerated;
     @Column(name = "RetailQuantity")
     private Double retailQuantity;
-    @Column(name = "PreRetailQuantity")
-    private Double preRetailQuantity;
     @Column(name = "HandledStatusId")
     private Long handledStatusId;
     @Column(name = "RetailPrice")
@@ -65,18 +62,18 @@ public class PhieuNhapChiTiets extends BaseEntity {
     private Double reduceQuantity;
     @Column(name = "IsModified")
     private Boolean isModified;
-    @Column(name = "GiaBanLe")
-    private BigDecimal giaBanLe;
-    @Column(name = "RetailOutPrice")
-    private Double retailOutPrice;
     @Column(name = "ItemOrder")
     private Integer itemOrder;
-    @Column(name = "RpMetadataHash")
-    private Integer rpMetadataHash;
     @Column(name = "ArchiveDrugId")
     private Long archiveDrugId;
     @Column(name = "ArchiveUnitId")
     private Long archiveUnitId;
+    @Column(name = "PreRetailQuantity")
+    private Double preRetailQuantity;
+    @Column(name = "BatchNumber")
+    private String batchNumber;
+    @Column(name = "ExpiredDate")
+    private Date expiredDate;
     @Column(name = "ExpirySetAuto")
     private Boolean expirySetAuto;
     @Column(name = "ReferenceId")
@@ -91,44 +88,69 @@ public class PhieuNhapChiTiets extends BaseEntity {
     private String connectivityResult;
     @Column(name = "VAT")
     private Double vat;
-    @Column(name = "LockReGenReportData")
-    private Boolean lockReGenReportData;
     @Column(name = "Reason")
     private String reason;
     @Column(name = "Solution")
     private String solution;
     @Column(name = "Notes")
     private String notes;
+    @Column(name = "LockReGenReportData")
+    private Boolean lockReGenReportData;
     @Column(name = "IsProdRef")
     private Boolean isProdRef;
+    @Column(name = "NegativeRevenue")
+    private Boolean negativeRevenue;
+    @Column(name = "Revenue")
+    private Double revenue;
     @Column(name = "RefPrice")
-    private BigDecimal refPrice;
-    @Column(name = "Decscription")
-    private String decscription;
-    @Column(name = "StorageConditions")
-    private String storageConditions;
-    @Column(name = "CreatedDate")
+    private Double refPrice;
+    @Column(name = "Usage")
+    private String usage;
+    @Column(name = "OutOwnerPriceChild")
+    private Double outOwnerPriceChild;
+    @Column(name="RecordStatusId")
+    private Long recordStatusId;
+    @Column(name="CreatedDate")
     private Date createdDate;
-    @Column(name = "HangLuanChuyen")
-    private Boolean hangLuanChuyen;
+
     @Transient
-    private String tenThuoc;
+    private String imageThumbData;
     @Transient
-    private String tenDonVi;
+    private String imagePreviewData;
     @Transient
-    private Integer thuocDMCId;
+    private Thuocs thuocs;
     @Transient
-    private Integer loaiHang;
+    private String donViTinhMaDonViTinhText;
     @Transient
-    private Integer soPhieuNhap;
+    private String maThuocText;
     @Transient
-    private Date ngayNhap;
+    private String tenThuocText;
     @Transient
-    private String soDangKy;
+    private Long soPhieuXuat;
     @Transient
-    private String maThuoc;
+    private Date ngayXuat;
     @Transient
-    private Long soNgayKhongGiaoDich;
+    private Double vatPhieuXuat;
+    @Transient
+    private Double debtPaymentAmount;
+    @Transient
+    private Long maLoaiXuatNhap;
+    @Transient
+    private String maLoaiXuatNhapText;
+    @Transient
+    private Long khachHangMaKhachHang;
+    @Transient
+    private String khachHangMaKhachHangText;
+    @Transient
+    private String createdByUserText;
+    @Transient
+    private Long targetStoreId;
+    @Transient
+    private String targetStoreText;
+    @Transient
+    private Long nhaCungCapMaNhaCungCap;
+    @Transient
+    private String nhaCungCapMaNhaCungCapText;
 
 }
 
