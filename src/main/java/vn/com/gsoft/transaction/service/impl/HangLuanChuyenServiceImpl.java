@@ -68,7 +68,7 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         if(hangLuanChuyens.stream().isParallel()) return false;
         hangLuanChuyens.forEach(x->{
             HangHoaLuanChuyen item = new HangHoaLuanChuyen();
-            item.setThuocId(x.getThuocDMCId() > 0 ? x.getThuocDMCId() : x.getThuocThuocId());
+            item.setThuocId(Math.toIntExact(x.getThuocDMCId() > 0 ? x.getThuocDMCId() : x.getThuocThuocId()));
             item.setMaCoSo(userInfo.getMaCoSo());
             item.setTenDonVi(x.getTenDonVi());
             item.setCitiId(userInfo.getCitiId());

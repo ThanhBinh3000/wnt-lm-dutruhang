@@ -16,6 +16,7 @@ import vn.com.gsoft.transaction.service.RedisListService;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 
 @Service
@@ -27,8 +28,10 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
     private PhieuDuTruChiTietRepository dtlRepo;
     private InventoryRepository inventoryRepository;
     private ThuocsRepository thuocsRepository;
-    //private NhomThuocsRepository nhomThuocsRepository;
+    private NhomThuocsRepository nhomThuocsRepository;
     private DonViTinhsRepository donViTinhsRepository;
+    private PhieuNhapChiTietsRepository phieuNhapChiTietsRepository;
+    private PhieuXuatChiTietsRepository phieuXuatChiTietsRepository;
     @Autowired
     private RedisListService redisListService;
     @Autowired
@@ -37,19 +40,23 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
     @Autowired
     public PhieuDuTruServiceImpl(PhieuDuTruRepository hdrRepo,
                                  PhieuDuTruChiTietRepository phieuDuTruChiTietRepository,
-                                InventoryRepository inventoryRepository,
+                                 InventoryRepository inventoryRepository,
                                  ThuocsRepository thuocsRepository,
-                                 //NhomThuocsRepository nhomThuocsRepository,
+                                 NhomThuocsRepository nhomThuocsRepository,
                                  DonViTinhsRepository donViTinhsRepository,
-                                 NhaThuocsRepository nhaThuocsRepository) {
+                                 NhaThuocsRepository nhaThuocsRepository,
+                                 PhieuNhapChiTietsRepository phieuNhapChiTietsRepository,
+                                 PhieuXuatChiTietsRepository phieuXuatChiTietsRepository) {
         super(hdrRepo);
         this.hdrRepo = hdrRepo;
         this.dtlRepo = phieuDuTruChiTietRepository;
         this.inventoryRepository = inventoryRepository;
         this.thuocsRepository = thuocsRepository;
-        //this.nhomThuocsRepository = nhomThuocsRepository;
+        this.nhomThuocsRepository = nhomThuocsRepository;
         this.donViTinhsRepository = donViTinhsRepository;
         this.nhaThuocsRepository = nhaThuocsRepository;
+        this.phieuNhapChiTietsRepository = phieuNhapChiTietsRepository;
+        this.phieuXuatChiTietsRepository = phieuXuatChiTietsRepository;
     }
 
     @Override
@@ -114,26 +121,41 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
     @Override
     public List<HangDuTruRes> searchListHangDuTru(HangDuTruReq objReq) throws Exception {
         Profile userInfo = this.getLoggedUser();
-        if (userInfo == null)
+        if (userInfo == null) {
             throw new Exception("Bad request.");
+        }
+
+        // Prepare request for GiaoDichHangHoa
         var req = new GiaoDichHangHoaReq();
         Calendar date = Calendar.getInstance();
         date.add(Calendar.MONTH, -3);
         req.setToDate(new Date());
         req.setFromDate(date.getTime());
-        List<GiaoDichHangHoa> giaoDichHangHoas = redisListService.getGiaoDichHangHoaValues(req).stream()
-                .map(element->(GiaoDichHangHoa) element)
-                .filter(thuoc -> userInfo.getMaCoSo().equals(thuoc.getMaCoSo()))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(
-                                GiaoDichHangHoa::getThuocId,
-                                thuoc -> thuoc,
-                                (existing, replacement) -> existing),  // Giữ thuốc đầu tiên nếu trùng thuocId
-                        map -> new ArrayList<>(map.values())
-                ));
-        List<HangDuTruRes> result = giaoDichHangHoas.stream()
-                .map(thuoc -> new HangDuTruRes(thuoc.getThuocId(), thuoc.getTenThuoc(), thuoc.getTenNhomThuoc(), thuoc.getTenDonVi(), thuoc.getGiaNhap(), BigDecimal.ZERO))
+
+        Map<Long, BigDecimal> receiptQuantities = calculateReceiptQuantities(userInfo.getMaCoSo(), req.getFromDate(), req.getToDate());
+        Map<Long, BigDecimal> deliveryQuantities = calculateDeliveryQuantities(userInfo.getMaCoSo(), req.getFromDate(), req.getToDate());
+
+        // Get drugIds
+        List<Long> drugIds = getUniqueDrugIds(receiptQuantities, deliveryQuantities);
+
+        Map<Long, DrugWarehouseSynthesisRes> warehouseSyntheses = getWarehouseSyntheses(drugIds, receiptQuantities, deliveryQuantities);
+
+        // Calculate inventory turnover values
+        Map<Long, BigDecimal> turnoverValues = getGiaTriVongQuay(warehouseSyntheses);
+
+        // Map the results to HangDuTruRes objects
+        List<HangDuTruRes> result = drugIds.stream()
+                .map(id -> new HangDuTruRes(
+                        id,
+                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenThuoc() : "",
+                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenNhomThuoc() : "",
+                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenDonViTinh() : "",
+                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getGiaNhap() : BigDecimal.ZERO,
+                        turnoverValues.getOrDefault(id, BigDecimal.ZERO) // Set deXuatDuTru with the turnover value
+                ))
+                .filter(hangDuTruRes -> hangDuTruRes.getDeXuatDuTru().compareTo(BigDecimal.ZERO) > 0) // Lọc các đối tượng có deXuatDuTru > 0
                 .toList();
+
         return result;
     }
 
@@ -188,5 +210,136 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
             result++;
         }
         return result;
+    }
+
+    private Map<Long, BigDecimal> getGiaTriVongQuay(Map<Long, DrugWarehouseSynthesisRes> drugWarehouseSyntheses) {
+        // Calculate inventory turnover for each drug
+        return drugWarehouseSyntheses.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> {
+                            DrugWarehouseSynthesisRes synthesis = entry.getValue();
+
+                            // Calculate average inventory
+                            BigDecimal averageInventoryValue = (synthesis.getFirstInventoryValue().add(synthesis.getLastInventoryValue()))
+                                    .divide(new BigDecimal(2), BigDecimal.ROUND_HALF_UP);
+
+                            // Avoid division by zero
+                            if (averageInventoryValue.compareTo(BigDecimal.ZERO) == 0) {
+                                return BigDecimal.ZERO;
+                            }
+
+                            // Calculate inventory turnover ratio
+                            BigDecimal turnoverRatio = synthesis.getDeliveryInventoryValueInPeriod()
+                                    .divide(averageInventoryValue, BigDecimal.ROUND_UP);
+
+                            if (turnoverRatio.compareTo(BigDecimal.ZERO) == 0) {
+                                return BigDecimal.ZERO;
+                            } else if (turnoverRatio.compareTo(BigDecimal.ONE) < 0) {
+                                turnoverRatio = BigDecimal.ONE;
+                            }
+
+                            // Calculate 90 / turnoverRatio and round to the nearest integer
+                            BigDecimal result = new BigDecimal("90").divide(turnoverRatio, BigDecimal.ROUND_HALF_UP);
+                            return result.setScale(0, BigDecimal.ROUND_HALF_UP); // Round to the nearest whole number
+                        }
+                ));
+    }
+
+    private Map<Long, DrugWarehouseSynthesisRes> getWarehouseSyntheses(List<Long> drugIds, Map<Long, BigDecimal> receiptQuantities, Map<Long, BigDecimal> deliveryQuantities) {
+        Map<Long, DrugWarehouseSynthesisRes> drugWarehouseSyntheses = new HashMap<>();
+
+        Iterable<Thuocs> validDrugsIterable = thuocsRepository.findAllById(drugIds);
+        List<Thuocs> validDrugs = StreamSupport.stream(validDrugsIterable.spliterator(), false)
+                .collect(Collectors.toList());
+
+        Map<Long, Thuocs> drugItems = validDrugs.stream()
+                .collect(Collectors.toMap(
+                        Thuocs::getId, // Assuming getId() method exists to retrieve the ID of Thuocs
+                        thuocs -> thuocs
+                ));
+
+        for (Thuocs i : drugItems.values()) {
+            // Khởi tạo và tính toán FirstInventoryValue
+            DrugWarehouseSynthesisRes synthesis = new DrugWarehouseSynthesisRes();
+            synthesis.setDrugId(i.getId());
+            synthesis.setFirstInventoryValue(i.getSoDuDauKy().multiply(i.getGiaDauKy()));
+            synthesis.setTenThuoc(i.getTenThuoc());
+            synthesis.setGiaNhap(i.getHeSo() > 1 ? i.getGiaNhap().multiply(BigDecimal.valueOf(i.getHeSo())) : i.getGiaNhap());
+            if (i.getNhomThuocMaNhomThuoc() != null) {
+                Optional<NhomThuocs> byIdNt = nhomThuocsRepository.findById(i.getNhomThuocMaNhomThuoc());
+                byIdNt.ifPresent(nhomThuocs -> synthesis.setTenNhomThuoc(nhomThuocs.getTenNhomThuoc()));
+            }
+            var maDonViTinh = i.getDonViThuNguyenMaDonViTinh() != null && i.getDonViThuNguyenMaDonViTinh() > 0 ? i.getDonViThuNguyenMaDonViTinh() : i.getDonViXuatLeMaDonViTinh();
+            if (maDonViTinh != null) {
+                Optional<DonViTinhs> byId = donViTinhsRepository.findByMaDonViTinh(Math.toIntExact(maDonViTinh));
+                byId.ifPresent(donViTinhs -> synthesis.setTenDonViTinh(donViTinhs.getTenDonViTinh()));
+            }
+            // Tính toán receiptQuantity và deliveryQuantity
+            BigDecimal receiptQuantity = receiptQuantities.getOrDefault(i.getId(), BigDecimal.ZERO);
+            BigDecimal deliveryQuantity = deliveryQuantities.getOrDefault(i.getId(), BigDecimal.ZERO);
+
+            // Tính toán inventoryQuantity
+            BigDecimal inventoryQuantity = receiptQuantity.compareTo(BigDecimal.ZERO) > 0
+                    ? synthesis.getFirstInventoryValue().divide(receiptQuantity, 3, BigDecimal.ROUND_HALF_UP)
+                    : BigDecimal.ZERO;
+            BigDecimal inventoryValue = BigDecimal.ZERO;
+
+            // Tính toán LastInventoryValue
+            if (inventoryQuantity.compareTo(new BigDecimal("0.001")) > 0) {
+                BigDecimal additionalValue = receiptQuantity.multiply(i.getGiaDauKy());
+                inventoryValue = inventoryValue.add(additionalValue);
+            } else {
+                BigDecimal additionalValue = synthesis.getFirstInventoryValue().multiply(i.getGiaDauKy());
+                inventoryValue = inventoryValue.add(additionalValue);
+            }
+            synthesis.setLastInventoryValue(inventoryValue);
+
+            // Tính toán DeliveryInventoryValueInPeriod
+            synthesis.setDeliveryInventoryValueInPeriod(deliveryQuantity.multiply(i.getGiaBanLe()));
+
+            // Thêm kết quả vào drugWarehouseSyntheses
+            drugWarehouseSyntheses.put(i.getId(), synthesis);
+        }
+
+        return drugWarehouseSyntheses;
+    }
+
+    private Map<Long, BigDecimal> calculateReceiptQuantities(String storeCode, Date fromDate, Date toDate) {
+        // Fetch receipt items based on storeCode, fromDate, toDate
+        List<PhieuNhapChiTiets> phieuNhapChiTiets = phieuNhapChiTietsRepository.findByStoreCodeAndDateRange(storeCode, fromDate, toDate);
+
+        // Filter and group receipt quantities by drugId
+        return phieuNhapChiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        PhieuNhapChiTiets::getThuocThuocId,
+                        Collectors.reducing(BigDecimal.ZERO, PhieuNhapChiTiets::getSoLuong, BigDecimal::add)
+                ));
+    }
+
+    private Map<Long, BigDecimal> calculateDeliveryQuantities(String storeCode, Date fromDate, Date toDate) {
+        // Fetch delivery items based on storeCode, fromDate, toDate
+        List<PhieuXuatChiTiets> phieuXuatChiTiets = phieuXuatChiTietsRepository.findByStoreCodeAndDateRange(storeCode, fromDate, toDate);
+
+        // Filter and group delivery quantities by drugId
+        return phieuXuatChiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        PhieuXuatChiTiets::getThuocThuocId,
+                        Collectors.reducing(BigDecimal.ZERO, PhieuXuatChiTiets::getSoLuong, BigDecimal::add)
+                ));
+    }
+
+    private List<Long> getUniqueDrugIds(Map<Long, BigDecimal> receiptQuantities, Map<Long, BigDecimal> deliveryQuantities) {
+        // Use a Set to store unique drugIds from both maps
+        Set<Long> drugIdsSet = new HashSet<>();
+
+        // Add all keys from receiptQuantities
+        drugIdsSet.addAll(receiptQuantities.keySet());
+
+        // Add all keys from deliveryQuantities (duplicates will be ignored by the Set)
+        drugIdsSet.addAll(deliveryQuantities.keySet());
+
+        // Convert the Set to a List
+        return new ArrayList<>(drugIdsSet);
     }
 }
