@@ -2,10 +2,12 @@ package vn.com.gsoft.transaction.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import vn.com.gsoft.transaction.model.system.BaseRequest;
 
 import java.util.Date;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PhieuXuatChiTietsReq extends BaseRequest {
     private Long phieuXuatMaPhieuXuat;
