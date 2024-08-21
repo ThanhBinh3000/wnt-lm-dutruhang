@@ -1,10 +1,12 @@
 package vn.com.gsoft.transaction.model.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import vn.com.gsoft.transaction.model.system.BaseRequest;
 
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PhieuDuTruChiTietReq extends BaseRequest {
     private Long maPhieuDuTru;
