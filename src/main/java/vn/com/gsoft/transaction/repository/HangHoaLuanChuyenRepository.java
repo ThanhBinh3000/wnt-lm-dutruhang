@@ -11,6 +11,7 @@ import vn.com.gsoft.transaction.model.dto.GiaoDichHangHoaReq;
 import vn.com.gsoft.transaction.model.dto.HangHoaLuanChuyenReq;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanChuyen, HangHoaLuanChuyenReq, Long> {
@@ -21,6 +22,7 @@ public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanC
             + " AND ((:#{#param.regionId} IS NULL) OR (c.regionId = :#{#param.regionId})) "
             + " AND ((:#{#param.wardId} IS NULL) OR (c.wardId = :#{#param.wardId})) "
             + " AND ((:#{#param.loaiHang} IS NULL) OR (c.loaiHang = :#{#param.loaiHang})) "
+            + " AND ((:#{#param.recordStatusId} IS NULL) OR (c.recordStatusId = :#{#param.recordStatusId})) "
             + " ORDER BY c.id", nativeQuery = true
     )
     Page<HangHoaLuanChuyen> searchPage(@Param("param") HangHoaLuanChuyenReq param, Pageable pageable);
@@ -32,8 +34,10 @@ public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanC
             + " AND ((:#{#param.regionId} IS NULL) OR (c.regionId = :#{#param.regionId})) "
             + " AND ((:#{#param.wardId} IS NULL) OR (c.wardId = :#{#param.wardId})) "
             + " AND ((:#{#param.loaiHang} IS NULL) OR (c.loaiHang = :#{#param.loaiHang})) "
+            + " AND ((:#{#param.recordStatusId} IS NULL) OR (c.recordStatusId = :#{#param.recordStatusId})) "
             + " ORDER BY c.id", nativeQuery = true
     )
     List<HangHoaLuanChuyen> searchList(@Param("param") HangHoaLuanChuyenReq param);
 
+    List<HangHoaLuanChuyen> findByMaPhieuNhapCTAndRecordStatusId(Long maPhieuChiTiet, Long recordStatusId);
 }

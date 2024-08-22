@@ -14,4 +14,5 @@ public class PhieuNhapChiTietsReq extends BaseRequest {
     private String nhaThuocMaNhaThuoc;
     private Date warnDate;
     private Boolean hangLuanChuyen;
+    private Boolean hangChuaLuanChuyen;
 }

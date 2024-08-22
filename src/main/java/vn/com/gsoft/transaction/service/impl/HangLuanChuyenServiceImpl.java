@@ -88,12 +88,34 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
             item.setSoLuong(x.getSoLuong());
             hdrRepo.save(item);
             //danh dau hang da luan chuyen
-            var pn = phieuNhapChiTietsRepository.findByMaPhieuNhapCt(x.getMaPhieuNhapCt());
+            var pn = phieuNhapChiTietsRepository.findByMaPhieuNhapCt(Long.valueOf(x.getMaPhieuNhapCt()));
             pn.setHangLuanChuyen(item.getId() > 0);
             phieuNhapChiTietsRepository.save(pn);
             //kafka gui thong bao toi co so nan can
         });
      return true;
+    }
+
+    public boolean deleteHangHoaLuanChuyen(Long maPhieuChiTiet) throws Exception{
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        //kiểm tra hàng có trên danh sách luôn chuyển không
+        var data = hdrRepo.findByMaPhieuNhapCTAndRecordStatusId(maPhieuChiTiet, RecordStatusContains.ACTIVE);
+        if(data.isEmpty()) return false;
+
+        //cập nhật trạng thái xoá
+        data.get(0).setRecordStatusId(RecordStatusContains.DELETED);
+        data.get(0).setModified(new Date());
+        data.get(0).setModifiedByUserId(userInfo.getId());
+        hdrRepo.save(data.get(0));
+        //cập nhật lại trạng thái phiếu
+        var pnct = phieuNhapChiTietsRepository.findByMaPhieuNhapCt(maPhieuChiTiet);
+        if(pnct != null){
+            pnct.setHangLuanChuyen(null);
+            phieuNhapChiTietsRepository.save(pnct);
+        }
+        return true;
     }
 
 }

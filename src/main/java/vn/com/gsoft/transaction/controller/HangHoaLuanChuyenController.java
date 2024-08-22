@@ -33,4 +33,10 @@ public class HangHoaLuanChuyenController {
     public ResponseEntity<BaseResponse> create(@RequestBody List<PhieuNhapChiTiets> objReq) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.saveHangHoaLuanChuyen(objReq)));
     }
+
+    @PostMapping(value = PathConstant.URL_DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> delete(@RequestBody PhieuNhapChiTiets req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.deleteHangHoaLuanChuyen(Long.valueOf(req.getMaPhieuNhapCt()))));
+    }
 }
