@@ -53,7 +53,7 @@ public interface PhieuNhapChiTietsRepository extends BaseRepository<PhieuNhapChi
   )
   Page<PhieuNhapChiTiets> searchPageHangItGiaoDich(@Param("param") PhieuNhapChiTietsReq param, Pageable pageable);
 
-  PhieuNhapChiTiets findByMaPhieuNhapCt(Integer maPhieuNhapCt);
+  PhieuNhapChiTiets findByMaPhieuNhapCt(Long maPhieuNhapCt);
 
   @Query("SELECT p FROM PhieuNhapChiTiets p WHERE p.nhaThuoc_MaNhaThuoc = :storeCode AND p.createdDate BETWEEN :fromDate AND :toDate")
   List<PhieuNhapChiTiets> findByStoreCodeAndDateRange(@Param("storeCode") String storeCode,

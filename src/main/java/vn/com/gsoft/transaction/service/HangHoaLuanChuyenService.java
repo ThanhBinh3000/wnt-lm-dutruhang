@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface HangHoaLuanChuyenService extends BaseService<HangHoaLuanChuyen, HangHoaLuanChuyenReq, Long>{
     boolean saveHangHoaLuanChuyen(List<PhieuNhapChiTiets> data) throws Exception;
+    boolean deleteHangHoaLuanChuyen(Long maPhieuChiTiet) throws Exception;
 }
 
