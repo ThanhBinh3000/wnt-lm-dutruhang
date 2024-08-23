@@ -82,7 +82,7 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
                 x.setNgayNhap(pn.get().getNgayNhap());
                 x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
             }
-            if(req.getHangLuanChuyen()){
+            if(req.getHangLuanChuyen() != null && req.getHangLuanChuyen()){
                 var hlc = hoaLuanChuyenRepository
                         .findByMaPhieuNhapCTAndRecordStatusId(Long.valueOf(x.getMaPhieuNhapCt()), RecordStatusContains.ACTIVE);
                 if(hlc != null) {
@@ -126,7 +126,7 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
                 x.setNgayNhap(pn.get().getNgayNhap());
                 x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
             }
-            if(req.getHangLuanChuyen()){
+            if(req.getHangLuanChuyen() != null && req.getHangLuanChuyen()){
                 var hlc = hoaLuanChuyenRepository
                         .findByMaPhieuNhapCTAndRecordStatusId(Long.valueOf(x.getMaPhieuNhapCt()), RecordStatusContains.ACTIVE);
                 if(hlc != null) {
