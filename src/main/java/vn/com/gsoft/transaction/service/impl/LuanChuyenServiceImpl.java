@@ -13,10 +13,7 @@ import vn.com.gsoft.transaction.entity.PhieuNhaps;
 import vn.com.gsoft.transaction.entity.Thuocs;
 import vn.com.gsoft.transaction.model.dto.PhieuNhapChiTietsReq;
 import vn.com.gsoft.transaction.model.system.Profile;
-import vn.com.gsoft.transaction.repository.DonViTinhsRepository;
-import vn.com.gsoft.transaction.repository.PhieuNhapChiTietsRepository;
-import vn.com.gsoft.transaction.repository.PhieuNhapsRepository;
-import vn.com.gsoft.transaction.repository.ThuocsRepository;
+import vn.com.gsoft.transaction.repository.*;
 import vn.com.gsoft.transaction.service.LuanChuyenService;
 
 import java.time.temporal.ChronoUnit;
@@ -35,12 +32,15 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
     private DonViTinhsRepository donViTinhsRepository;
     @Autowired
     private PhieuNhapsRepository phieuNhapsRepository;
+    @Autowired
+    HangHoaLuanChuyenRepository hoaLuanChuyenRepository;
 
     @Autowired
     public LuanChuyenServiceImpl(PhieuNhapChiTietsRepository hdrRepo
                                      , ThuocsRepository thuocsRepository
                                      , DonViTinhsRepository donViTinhsRepository
                                      , PhieuNhapsRepository phieuNhapsRepository
+                                     , HangHoaLuanChuyenRepository hoaLuanChuyenRepository
 
     ) {
         super(hdrRepo);
@@ -48,6 +48,7 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
         this.thuocsRepository = thuocsRepository;
         this.donViTinhsRepository = donViTinhsRepository;
         this.phieuNhapsRepository = phieuNhapsRepository;
+        this.hoaLuanChuyenRepository = hoaLuanChuyenRepository;
     }
 
     @Override
@@ -80,6 +81,13 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
             if(pn.isPresent()) {
                 x.setNgayNhap(pn.get().getNgayNhap());
                 x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
+            }
+            if(req.getHangLuanChuyen()){
+                var hlc = hoaLuanChuyenRepository
+                        .findByMaPhieuNhapCTAndRecordStatusId(Long.valueOf(x.getMaPhieuNhapCt()), RecordStatusContains.ACTIVE);
+                if(hlc != null) {
+                    x.setDecscription(hlc.get(0).getGhiChu());
+                }
             }
         });
 
@@ -117,6 +125,13 @@ public class LuanChuyenServiceImpl extends BaseServiceImpl<PhieuNhapChiTiets, Ph
             if(pn.isPresent()) {
                 x.setNgayNhap(pn.get().getNgayNhap());
                 x.setSoPhieuNhap(Math.toIntExact(pn.get().getSoPhieuNhap()));
+            }
+            if(req.getHangLuanChuyen()){
+                var hlc = hoaLuanChuyenRepository
+                        .findByMaPhieuNhapCTAndRecordStatusId(Long.valueOf(x.getMaPhieuNhapCt()), RecordStatusContains.ACTIVE);
+                if(hlc != null) {
+                    x.setDecscription(hlc.get(0).getGhiChu());
+                }
             }
             //tính ngày
             long day = ChronoUnit.DAYS.between(x.getNgayNhap().toInstant(), curentDate.toInstant());
