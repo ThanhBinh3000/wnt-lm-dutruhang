@@ -17,6 +17,7 @@ import vn.com.gsoft.transaction.repository.PhieuNhapChiTietsRepository;
 import vn.com.gsoft.transaction.repository.ThuocsRepository;
 import vn.com.gsoft.transaction.service.HangHoaLuanChuyenService;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +86,7 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
             item.setCreatedByUserId(userInfo.getId());
             item.setRecordStatusId(RecordStatusContains.ACTIVE);
             item.setMaPhieuNhapCT(x.getMaPhieuNhapCt());
-            item.setSoLuong(x.getSoLuong());
+            item.setSoLuong(BigDecimal.valueOf(x.getRemainRefQuantity()));
             hdrRepo.save(item);
             //danh dau hang da luan chuyen
             var pn = phieuNhapChiTietsRepository.findByMaPhieuNhapCt(Long.valueOf(x.getMaPhieuNhapCt()));
