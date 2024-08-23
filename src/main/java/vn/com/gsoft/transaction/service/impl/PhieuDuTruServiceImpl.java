@@ -183,7 +183,7 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
             chiTiet.setSoLuongCanhBao(BigDecimal.ZERO);
             Optional<Thuocs> byIdNt = thuocsRepository.findById(chiTiet.getMaThuoc());
             byIdNt.ifPresent(thuocs -> {
-                if(thuocs.getDonViThuNguyenMaDonViTinh() > 0){
+                if(thuocs.getDonViThuNguyenMaDonViTinh() != null && thuocs.getDonViThuNguyenMaDonViTinh() > 0){
                     chiTiet.setMaDonViDuTru(thuocs.getDonViThuNguyenMaDonViTinh());
                 }
                 else {
