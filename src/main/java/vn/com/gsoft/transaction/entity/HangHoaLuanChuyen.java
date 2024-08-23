@@ -51,12 +51,6 @@ public class HangHoaLuanChuyen extends BaseEntity {
     private String soDienThoai;
     @Column(name = "MaPhieuNhapCT")
     private Integer maPhieuNhapCT;
-    @Column(name = "ThuocIdCs")
-    private Integer thuocIdCs;
-    @Column(name = "NhomHoatChatId")
-    private String nhomHoatChatId;
-    @Column(name = "NhomNganhHangId")
-    private BigDecimal nhomNganhHangId;
     @Transient
     private String tenThuoc;
 }
