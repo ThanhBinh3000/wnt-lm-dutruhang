@@ -62,7 +62,7 @@ public class KafkaConfig {
         // security
         props.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, securityProtocol);
         props.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJAAS);
+        //props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJAAS);
 
         return props;
     }
