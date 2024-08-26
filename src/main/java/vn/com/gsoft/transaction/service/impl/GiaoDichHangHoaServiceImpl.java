@@ -163,7 +163,7 @@ public class GiaoDichHangHoaServiceImpl extends BaseServiceImpl<GiaoDichHangHoa,
                                             x.get(0).getTenNhomThuoc(),
                                             x.get(0).getTenDonVi(),
                                             x.get(0).getGiaNhap(),
-                                            BigDecimal.ONE,
+                                            BigDecimal.ZERO,
                                             x.stream().map(GiaoDichHangHoa::getSoLuong).reduce(BigDecimal.ZERO, BigDecimal::add)
                                     );
                                 }
