@@ -39,4 +39,18 @@ public class KafkaProducerImpl implements KafkaProducer {
         CompletableFuture<SendResult<String, String>> future = kafkaInternalTemplate.send(topic, payload);
         return future.get(sendTimeout, TimeUnit.SECONDS);
     }
+
+    @Override
+    @Retryable(
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 5000, multiplier = 2),
+            value = {
+                    TimeoutException.class
+            }
+    )
+    public SendResult<String, String> sendInternal(String topic, String key, String payload) throws InterruptedException, ExecutionException, TimeoutException {
+        log.info("Sent Time: {}  - Sent topic: {}  Sent key: {} - payload: {}", new Date(), topic, key, payload);
+        CompletableFuture<SendResult<String, String>> future = kafkaInternalTemplate.send(topic, key, payload);
+        return future.get(sendTimeout, TimeUnit.SECONDS);
+    }
 }

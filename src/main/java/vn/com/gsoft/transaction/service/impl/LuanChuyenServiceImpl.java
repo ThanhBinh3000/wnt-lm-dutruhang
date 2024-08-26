@@ -1,11 +1,16 @@
 package vn.com.gsoft.transaction.service.impl;
 
+import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
+import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import vn.com.gsoft.transaction.constant.JobContains;
 import vn.com.gsoft.transaction.constant.LoaiHangContains;
 import vn.com.gsoft.transaction.constant.RecordStatusContains;
 import vn.com.gsoft.transaction.entity.PhieuNhapChiTiets;
@@ -13,13 +18,15 @@ import vn.com.gsoft.transaction.entity.PhieuNhaps;
 import vn.com.gsoft.transaction.entity.Thuocs;
 import vn.com.gsoft.transaction.model.dto.PhieuNhapChiTietsReq;
 import vn.com.gsoft.transaction.model.system.Profile;
+import vn.com.gsoft.transaction.model.system.WrapData;
 import vn.com.gsoft.transaction.repository.*;
+import vn.com.gsoft.transaction.service.KafkaProducer;
 import vn.com.gsoft.transaction.service.LuanChuyenService;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @Log4j2
