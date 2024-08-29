@@ -32,6 +32,7 @@ public interface PhieuNhapChiTietsRepository extends BaseRepository<PhieuNhapChi
   @Query(value = "SELECT c FROM PhieuNhapChiTiets c " +
           "WHERE 1=1 "
           + " AND (:#{#param.id} IS NULL OR c.maPhieuNhapCt = :#{#param.id}) "
+          + " AND (:#{#param.thuocId} IS NULL OR c.thuocThuocId = :#{#param.thuocId}) "
           + " AND (:#{#param.nhaThuocMaNhaThuoc} IS NULL OR c.nhaThuoc_MaNhaThuoc = :#{#param.nhaThuocMaNhaThuoc})"
           + " AND (:#{#param.warnDate} IS NULL OR (c.hanDung IS NOT NULL AND c.hanDung <= :#{#param.warnDate}))"
           + " AND c.remainRefQuantity > 0"
@@ -44,6 +45,7 @@ public interface PhieuNhapChiTietsRepository extends BaseRepository<PhieuNhapChi
   @Query(value = "SELECT c FROM PhieuNhapChiTiets c " +
           "WHERE 1=1 "
           + " AND (:#{#param.id} IS NULL OR c.maPhieuNhapCt = :#{#param.id}) "
+          + " AND (:#{#param.thuocId} IS NULL OR c.thuocThuocId = :#{#param.thuocId}) "
           + " AND (:#{#param.nhaThuocMaNhaThuoc} IS NULL OR c.nhaThuoc_MaNhaThuoc = :#{#param.nhaThuocMaNhaThuoc})"
           + " AND (:#{#param.warnDate} IS NULL OR c.createdDate <= :#{#param.warnDate})"
           + " AND c.remainRefQuantity > 0"
