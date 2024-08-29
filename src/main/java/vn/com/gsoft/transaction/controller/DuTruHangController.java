@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.com.gsoft.transaction.model.dto.HangDuTruReq;
 import vn.com.gsoft.transaction.model.dto.PhieuDuTruReq;
+import vn.com.gsoft.transaction.model.dto.ThuocsReq;
 import vn.com.gsoft.transaction.response.BaseResponse;
 import vn.com.gsoft.transaction.service.PhieuDuTruService;
 import vn.com.gsoft.transaction.util.system.ResponseUtils;
@@ -41,5 +42,11 @@ public class DuTruHangController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchListTop10HangBanChay(@RequestBody HangDuTruReq objReq) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.searchListTop10HangBanChay(objReq)));
+    }
+
+    @PostMapping(value = "search-page-hang-du-tru", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> colectionListHangDuTru(@RequestBody ThuocsReq objReq) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.colectionPageHangDuTru(objReq)));
     }
 }

@@ -119,5 +119,6 @@ public class ThuocsReq extends BaseRequest {
     private Long userIdMapping;
 
     private Boolean dataDelete;
+    private Long nhaCungCapMaNhaCungCap;
 }
 

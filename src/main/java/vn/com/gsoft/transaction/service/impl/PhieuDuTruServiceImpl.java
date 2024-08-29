@@ -3,6 +3,9 @@ package vn.com.gsoft.transaction.service.impl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.com.gsoft.transaction.constant.RecordStatusContains;
 import vn.com.gsoft.transaction.entity.*;
@@ -174,6 +177,63 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
         return topSoLuongBanChays;
     }
 
+    @Override
+    public Page<Thuocs> colectionPageHangDuTru(ThuocsReq req) throws Exception {
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
+        req.setNhaThuocMaNhaThuoc(userInfo.getMaCoSo());
+
+        if (req.getDataDelete() != null) {
+            req.setRecordStatusId(req.getDataDelete() ? RecordStatusContains.DELETED : RecordStatusContains.ACTIVE);
+        }
+        Page<Thuocs> thuocs = thuocsRepository.colectionPagePhieuDuTru(req, pageable);
+        thuocs.getContent().forEach(item -> {
+            if (item.getNhomThuocMaNhomThuoc() != null) {
+                Optional<NhomThuocs> byIdNt = nhomThuocsRepository.findById(item.getNhomThuocMaNhomThuoc());
+                byIdNt.ifPresent(nhomThuocs -> item.setTenNhomThuoc(nhomThuocs.getTenNhomThuoc()));
+            }
+            if (item.getDonViThuNguyenMaDonViTinh() != null) {
+                Optional<DonViTinhs> byIdNt = donViTinhsRepository.findByMaDonViTinh(Math.toIntExact(item.getDonViThuNguyenMaDonViTinh()));
+                byIdNt.ifPresent(donViTinhs -> item.setTenDonViTinhThuNguyen(donViTinhs.getTenDonViTinh()));
+            }
+            if (item.getDonViXuatLeMaDonViTinh() != null) {
+                Optional<DonViTinhs> byIdNt = donViTinhsRepository.findByMaDonViTinh(Math.toIntExact(item.getDonViXuatLeMaDonViTinh()));
+                byIdNt.ifPresent(donViTinhs -> item.setTenDonViTinhXuatLe(donViTinhs.getTenDonViTinh()));
+            }
+//            InventoryReq inventoryReq = new InventoryReq();
+//            inventoryReq.setDrugID(item.getId());
+//            inventoryReq.setDrugStoreID(item.getNhaThuocMaNhaThuoc());
+//            inventoryReq.setRecordStatusID(RecordStatusContains.ACTIVE);
+//            HashMap<Integer, Double> inventory = getTotalInventory(inventoryReq);
+//            item.setLastValue(inventory.get(item.getId().intValue()));
+        });
+        return thuocs;
+    }
+
+    @Override
+    public List<PhieuDuTru> createNhaCC(List<PhieuDuTruReq> req) throws Exception {
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null) {
+            throw new Exception("Bad request.");
+        }
+        List<PhieuDuTru> savedRecords = new ArrayList<>();
+        for (PhieuDuTruReq data : req) {
+            data.setMaNhaThuoc(userInfo.getMaCoSo());
+            data.setRecordStatusId(RecordStatusContains.ACTIVE);
+            PhieuDuTru hdr = new PhieuDuTru();
+            BeanUtils.copyProperties(data, hdr, "id");
+            hdr.setCreated(new Date());
+            hdr.setCreatedByUserId(userInfo.getId());
+            PhieuDuTru save = hdrRepo.save(hdr);
+            List<PhieuDuTruChiTiet> phieuNhapChiTiets = saveChildren(save.getId(), data);
+            save.setChiTiets(phieuNhapChiTiets);
+            savedRecords.add(hdrRepo.save(save));
+        }
+        return savedRecords;
+    }
+
     private List<PhieuDuTruChiTiet> saveChildren(Long idHdr, PhieuDuTruReq req) {
         // save chi tiết
         dtlRepo.deleteAllByMaPhieuDuTru(idHdr);
@@ -192,7 +252,7 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
                 chiTiet.setSoLuongCanhBao(BigDecimal.valueOf(thuocs.getGioiHan()));
             });
 
-            Optional<Inventory> byIdInventory = inventoryRepository.findByDrugStoreIDAndDrugID(req.getMaNhaThuoc(), chiTiet.getMaThuoc());
+            Optional<Inventory> byIdInventory = inventoryRepository.findByDrugStoreIDAndDrugID(req.getMaNhaThuoc(), chiTiet.getMaThuoc()).stream().findFirst();
             byIdInventory.ifPresent(inventory -> {
                 chiTiet.setMaDonViTon(Long.valueOf(inventory.getDrugUnitID()));
                 chiTiet.setTonKho(BigDecimal.valueOf(inventory.getLastValue()));

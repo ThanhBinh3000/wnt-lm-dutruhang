@@ -242,5 +242,15 @@ public class Thuocs {
     private Long userIdMapping;
     @Column(name = "RecordStatusID")
     private Long recordStatusID;
+
+    // @Transient
+    @Transient
+    private String tenNhomThuoc;
+
+    @Transient
+    private String tenDonViTinhXuatLe;
+
+    @Transient
+    private String tenDonViTinhThuNguyen;
 }
 
