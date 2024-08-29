@@ -116,5 +116,5 @@ public interface InventoryRepository extends BaseRepository<Inventory, Inventory
     @Query("UPDATE Inventory i SET i.lastInPrice = :inPrice, i.lastUpdated = :lastUpdated WHERE i.drugID = :drugId AND i.drugStoreID IN :storeCodes")
     void updateInPriceInventory(@Param("drugId") Long drugId, @Param("storeCodes") List<String> storeCodes, @Param("inPrice") BigDecimal inPrice, @Param("lastUpdated") Date lastUpdated);
 
-    Optional<Inventory> findByDrugStoreIDAndDrugID(String storeCode, Long thuocId);
+    Optional<Inventory> findFirstByDrugStoreIDAndDrugID(String storeCode, Long thuocId);
 }
