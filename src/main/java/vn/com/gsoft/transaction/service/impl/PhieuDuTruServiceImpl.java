@@ -252,7 +252,7 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
                 chiTiet.setSoLuongCanhBao(BigDecimal.valueOf(thuocs.getGioiHan()));
             });
 
-            Optional<Inventory> byIdInventory = inventoryRepository.findByDrugStoreIDAndDrugID(req.getMaNhaThuoc(), chiTiet.getMaThuoc());
+            Optional<Inventory> byIdInventory = inventoryRepository.findByDrugStoreIDAndDrugID(req.getMaNhaThuoc(), chiTiet.getMaThuoc()).stream().findFirst();
             byIdInventory.ifPresent(inventory -> {
                 chiTiet.setMaDonViTon(Long.valueOf(inventory.getDrugUnitID()));
                 chiTiet.setTonKho(BigDecimal.valueOf(inventory.getLastValue()));
