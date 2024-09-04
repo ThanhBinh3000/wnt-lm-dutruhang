@@ -164,17 +164,16 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
 
     @Override
     public List<HangDuTruRes> searchListTop10HangBanChay(HangDuTruReq objReq) throws Exception {
-        Profile userInfo = this.getLoggedUser();
-        if (userInfo == null)
-            throw new Exception("Bad request.");
-        var req = new GiaoDichHangHoaReq();
-        Calendar date = Calendar.getInstance();
-        date.add(Calendar.MONTH, -3);
-        req.setToDate(new Date());
-        req.setFromDate(date.getTime());
-        req.setPageSize(10);
-        List<HangDuTruRes> topSoLuongBanChays = giaoDichHangHoaService.topSoLuongBanChay(req);
-        return topSoLuongBanChays;
+       Profile userInfo = this.getLoggedUser();
+      if (userInfo == null)
+           throw new Exception("Bad request.");
+        List<TopMatHangRes> topSoLuongBanChays = redisListService.getAllDataFromRedis();
+        var items = new ArrayList<HangDuTruRes>();
+        topSoLuongBanChays.forEach(x->{
+            var item = new HangDuTruRes(x.getThuocId(), x.getTenThuoc(),null,x.getTenDonVi(), BigDecimal.ZERO, BigDecimal.ZERO);
+            items.add(item);
+        });
+        return items;
     }
 
     @Override

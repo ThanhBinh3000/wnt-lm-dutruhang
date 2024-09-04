@@ -8,7 +8,4 @@ import vn.com.gsoft.transaction.model.dto.TopMatHangRes;
 import java.util.List;
 
 public interface GiaoDichHangHoaService extends BaseService<GiaoDichHangHoa, GiaoDichHangHoaReq, Long> {
-    List<TopMatHangRes> topDoanhThuBanChay(GiaoDichHangHoaReq req) throws Exception;
-    List<TopMatHangRes> topTSLNCaoNhat(GiaoDichHangHoaReq req) throws Exception;
-    List<HangDuTruRes> topSoLuongBanChay(GiaoDichHangHoaReq req) throws Exception;
 }

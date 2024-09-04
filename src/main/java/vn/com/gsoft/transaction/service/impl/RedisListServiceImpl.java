@@ -5,10 +5,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import vn.com.gsoft.transaction.entity.GiaoDichHangHoa;
 import vn.com.gsoft.transaction.model.dto.GiaoDichHangHoaReq;
+import vn.com.gsoft.transaction.model.dto.TopMatHangRes;
 import vn.com.gsoft.transaction.service.RedisListService;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RedisListServiceImpl implements RedisListService {
@@ -29,5 +31,12 @@ public class RedisListServiceImpl implements RedisListService {
             var timestamp = Double.parseDouble(new SimpleDateFormat("yyyyMMdd").format(x.getNgayGiaoDich()));
             redisTemplate.opsForZSet().add("transactions", x, timestamp);
         });
+    }
+    public List<TopMatHangRes> getAllDataFromRedis() {
+        Set<String> keys = redisTemplate.keys(" 3-thang-top-sl:*");
+
+        return keys.stream()
+                .map(key -> (TopMatHangRes) redisTemplate.opsForValue().get(key))  // Lấy đối tượng từ Redis và cast về kiểu MyObject
+                .collect(Collectors.toList());
     }
 }
