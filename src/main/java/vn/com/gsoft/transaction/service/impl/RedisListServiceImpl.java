@@ -33,10 +33,10 @@ public class RedisListServiceImpl implements RedisListService {
         });
     }
     public List<TopMatHangRes> getAllDataFromRedis() {
-        Set<String> keys = redisTemplate.keys(" 3-thang-top-sl:*");
+        Set<String> keys = redisTemplate.keys("top-sl-3-thang-gan-nhat:*");
 
         return keys.stream()
-                .map(key -> (TopMatHangRes) redisTemplate.opsForValue().get(key))  // Lấy đối tượng từ Redis và cast về kiểu MyObject
+                .map(key -> (TopMatHangRes) redisTemplate.opsForValue().get(key))
                 .collect(Collectors.toList());
     }
 }
