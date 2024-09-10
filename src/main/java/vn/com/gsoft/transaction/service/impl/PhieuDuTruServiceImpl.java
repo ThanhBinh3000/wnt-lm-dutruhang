@@ -164,10 +164,12 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
 
     @Override
     public List<HangDuTruRes> searchListTop10HangBanChay(HangDuTruReq objReq) throws Exception {
-       Profile userInfo = this.getLoggedUser();
-      if (userInfo == null)
-           throw new Exception("Bad request.");
-        List<TopMatHangRes> topSoLuongBanChays = redisListService.getAllDataFromRedis();
+//       Profile userInfo = this.getLoggedUser();
+//      if (userInfo == null)
+//           throw new Exception("Bad request.");
+        List<TopMatHangRes> topSoLuongBanChays = redisListService.getAllDataFromRedis().stream()
+                .sorted((g1, g2) -> g2.getSoLieuThiTruong().compareTo(g1.getSoLieuThiTruong()))
+                .limit(10).toList();
         var items = new ArrayList<HangDuTruRes>();
         topSoLuongBanChays.forEach(x->{
             var item = new HangDuTruRes(x.getThuocId(), x.getTenThuoc(),null,x.getTenDonVi(), BigDecimal.ZERO, BigDecimal.ZERO);
