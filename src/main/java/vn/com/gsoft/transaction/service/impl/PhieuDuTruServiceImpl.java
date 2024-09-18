@@ -17,8 +17,10 @@ import vn.com.gsoft.transaction.service.PhieuDuTruService;
 import vn.com.gsoft.transaction.service.RedisListService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
@@ -35,6 +37,7 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
     private DonViTinhsRepository donViTinhsRepository;
     private PhieuNhapChiTietsRepository phieuNhapChiTietsRepository;
     private PhieuXuatChiTietsRepository phieuXuatChiTietsRepository;
+    private BaoCaoKhoHangRepository baoCaoKhoHangRepository;
     @Autowired
     private RedisListService redisListService;
     @Autowired
@@ -49,7 +52,8 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
                                  DonViTinhsRepository donViTinhsRepository,
                                  NhaThuocsRepository nhaThuocsRepository,
                                  PhieuNhapChiTietsRepository phieuNhapChiTietsRepository,
-                                 PhieuXuatChiTietsRepository phieuXuatChiTietsRepository) {
+                                 PhieuXuatChiTietsRepository phieuXuatChiTietsRepository,
+                                 BaoCaoKhoHangRepository baoCaoKhoHangRepository) {
         super(hdrRepo);
         this.hdrRepo = hdrRepo;
         this.dtlRepo = phieuDuTruChiTietRepository;
@@ -60,6 +64,7 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
         this.nhaThuocsRepository = nhaThuocsRepository;
         this.phieuNhapChiTietsRepository = phieuNhapChiTietsRepository;
         this.phieuXuatChiTietsRepository = phieuXuatChiTietsRepository;
+        this.baoCaoKhoHangRepository = baoCaoKhoHangRepository;
     }
 
     @Override
@@ -135,29 +140,22 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
         req.setToDate(new Date());
         req.setFromDate(date.getTime());
 
-        Map<Long, BigDecimal> receiptQuantities = calculateReceiptQuantities(userInfo.getMaCoSo(), req.getFromDate(), req.getToDate());
-        Map<Long, BigDecimal> deliveryQuantities = calculateDeliveryQuantities(userInfo.getMaCoSo(), req.getFromDate(), req.getToDate());
+        List<BaoCaoKhoHang> baoCaoKhoHangs = baoCaoKhoHangRepository.findByMaNhaThuoc(userInfo.getMaCoSo());
 
-        // Get drugIds
-        List<Long> drugIds = getUniqueDrugIds(receiptQuantities, deliveryQuantities);
-
-        Map<Long, DrugWarehouseSynthesisRes> warehouseSyntheses = getWarehouseSyntheses(drugIds, receiptQuantities, deliveryQuantities);
-
-        // Calculate inventory turnover values
-        Map<Long, BigDecimal> turnoverValues = getGiaTriVongQuay(warehouseSyntheses);
-
-        // Map the results to HangDuTruRes objects
-        List<HangDuTruRes> result = drugIds.stream()
-                .map(id -> new HangDuTruRes(
-                        id,
-                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenThuoc() : "",
-                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenNhomThuoc() : "",
-                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getTenDonViTinh() : "",
-                        warehouseSyntheses.containsKey(id) ? warehouseSyntheses.get(id).getGiaNhap() : BigDecimal.ZERO,
-                        turnoverValues.getOrDefault(id, BigDecimal.ZERO) // Set deXuatDuTru with the turnover value
-                ))
-                .filter(hangDuTruRes -> hangDuTruRes.getDeXuatDuTru().compareTo(BigDecimal.ZERO) > 0) // Lọc các đối tượng có deXuatDuTru > 0
-                .toList();
+        List<HangDuTruRes> result = baoCaoKhoHangs.stream()
+                .map(baoCao -> {
+                    BigDecimal deXuatDuTru = baoCao.getSoVongQuay().setScale(0, RoundingMode.HALF_UP); // Làm tròn về số nguyên
+                    return new HangDuTruRes(
+                            Long.valueOf(baoCao.getThuocId()),
+                            baoCao.getTenThuoc(),
+                            baoCao.getTenNhomThuoc(),
+                            baoCao.getTenDonViTinhDuTru(),
+                            baoCao.getGiaNhap(),
+                            deXuatDuTru
+                    );
+                })
+                .filter(hangDuTruRes -> hangDuTruRes.getDeXuatDuTru().compareTo(BigDecimal.ZERO) > 0) // Lọc bỏ các giá trị deXuatDuTru = 0
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -296,13 +294,9 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
 
                             if (turnoverRatio.compareTo(BigDecimal.ZERO) == 0) {
                                 return BigDecimal.ZERO;
-                            } else if (turnoverRatio.compareTo(BigDecimal.ONE) < 0) {
-                                turnoverRatio = BigDecimal.ONE;
                             }
 
-                            // Calculate 90 / turnoverRatio and round to the nearest integer
-                            BigDecimal result = new BigDecimal("90").divide(turnoverRatio, BigDecimal.ROUND_HALF_UP);
-                            return result.setScale(0, BigDecimal.ROUND_HALF_UP); // Round to the nearest whole number
+                            return turnoverRatio.setScale(0, BigDecimal.ROUND_HALF_UP); // Round to the nearest whole number
                         }
                 ));
     }
@@ -403,4 +397,73 @@ public class PhieuDuTruServiceImpl extends BaseServiceImpl<PhieuDuTru, PhieuDuTr
         // Convert the Set to a List
         return new ArrayList<>(drugIdsSet);
     }
+
+    private Map<Long, ThuocsReq> getThuocMap(List<Long> drugIds) {
+        Map<Long, ThuocsReq> thuocsReqMap = new HashMap<>();
+
+        // Lấy danh sách validDrugs từ drugIds
+        Iterable<Thuocs> validDrugsIterable = thuocsRepository.findAllById(drugIds);
+        List<Thuocs> validDrugs = StreamSupport.stream(validDrugsIterable.spliterator(), false)
+                .collect(Collectors.toList());
+
+        // Tạo Map chứa các đối tượng Thuocs với ID làm key
+        Map<Long, Thuocs> drugItems = validDrugs.stream()
+                .collect(Collectors.toMap(
+                        Thuocs::getId,
+                        thuocs -> thuocs
+                ));
+
+        // Tạo danh sách chứa các maNhomThuoc và maDonViTinh cần truy vấn
+        Set<Long> maNhomThuocs = validDrugs.stream()
+                .map(Thuocs::getNhomThuocMaNhomThuoc)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Set<Integer> maDonViTinhs = validDrugs.stream()
+                .flatMap(i -> Stream.of(i.getDonViThuNguyenMaDonViTinh(), i.getDonViXuatLeMaDonViTinh()))
+                .filter(Objects::nonNull).map(Long::intValue)
+                .collect(Collectors.toSet());
+
+        // Tạo Map cho NhomThuocs và DonViTinhs để giảm số lượng truy vấn
+        Map<Long, NhomThuocs> nhomThuocsMap = StreamSupport.stream(nhomThuocsRepository.findAllById(maNhomThuocs).spliterator(), false)
+                .collect(Collectors.toMap(NhomThuocs::getId, nhomThuocs -> nhomThuocs));
+
+        Map<Long, DonViTinhs> donViTinhsMap = StreamSupport.stream(donViTinhsRepository.findAllById(maDonViTinhs).spliterator(), false)
+                .collect(Collectors.toMap(
+                        donViTinhs -> Long.valueOf(donViTinhs.getMaDonViTinh()),
+                        donViTinhs -> donViTinhs
+                ));
+
+        // Lặp qua drugItems để tạo các đối tượng ThuocsReq
+        for (Thuocs i : drugItems.values()) {
+            ThuocsReq thuocsReq = new ThuocsReq();
+            thuocsReq.setId(i.getId());
+            thuocsReq.setTenThuoc(i.getTenThuoc());
+            thuocsReq.setGiaNhap(i.getHeSo() > 1 ? i.getGiaNhap().multiply(BigDecimal.valueOf(i.getHeSo())) : i.getGiaNhap());
+
+            // Lấy tên nhóm thuốc từ nhomThuocsMap nếu có
+            if (i.getNhomThuocMaNhomThuoc() != null) {
+                NhomThuocs nhomThuocs = nhomThuocsMap.get(i.getNhomThuocMaNhomThuoc());
+                if (nhomThuocs != null) {
+                    thuocsReq.setTenNhomThuoc(nhomThuocs.getTenNhomThuoc());
+                }
+            }
+
+            // Xác định mã đơn vị tính và lấy tên đơn vị tính từ donViTinhsMap nếu có
+            Long maDonViTinh = i.getDonViThuNguyenMaDonViTinh() != null && i.getDonViThuNguyenMaDonViTinh() > 0
+                    ? i.getDonViThuNguyenMaDonViTinh() : i.getDonViXuatLeMaDonViTinh();
+            if (maDonViTinh != null) {
+                DonViTinhs donViTinhs = donViTinhsMap.get(maDonViTinh);
+                if (donViTinhs != null) {
+                    thuocsReq.setTenDonViTinhDuTru(donViTinhs.getTenDonViTinh());
+                }
+            }
+
+            // Thêm ThuocsReq vào thuocsReqMap
+            thuocsReqMap.put(i.getId(), thuocsReq);
+        }
+
+        return thuocsReqMap;
+    }
+
 }
