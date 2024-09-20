@@ -69,7 +69,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
         req.setMaCoSoNhan(userInfo.getMaCoSo());
-        var ds = hdrRepo.searchPage(req, pageable);
+        var ds = hdrRepo.searchPageQuanTam(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
@@ -99,7 +99,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
         req.setMaCoSoGui(userInfo.getMaCoSo());
-        var ds = hdrRepo.searchPage(req, pageable);
+        var ds = hdrRepo.searchPageGiaoDich(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));

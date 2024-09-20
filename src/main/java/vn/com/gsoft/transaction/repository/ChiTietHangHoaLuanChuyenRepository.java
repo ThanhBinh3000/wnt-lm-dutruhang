@@ -21,11 +21,24 @@ public interface ChiTietHangHoaLuanChuyenRepository extends BaseRepository<ChiTi
             + " AND ((:#{#param.thuocId} IS NULL) OR (c.thuocId = :#{#param.thuocId})) "
             + " AND ((:#{#param.maGiaoDich} IS NULL) OR (c.maGiaoDich = :#{#param.maGiaoDich})) "
             + " AND ((:#{#param.trangThai} IS NULL) OR (c.trangThai = :#{#param.trangThai})) "
+            + " AND ((:#{#param.maCoSoNhan} IS NULL) OR (c.maCoSoNhan = :#{#param.maCoSoNhan})) "
             + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "
             + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})" +
             " ORDER BY c.id DESC", nativeQuery = true
     )
-    Page<ChiTietHangHoaLuanChuyen> searchPage(@Param("param") ChiTietHangLuanChuyenReq param, Pageable pageable);
+    Page<ChiTietHangHoaLuanChuyen> searchPageQuanTam(@Param("param") ChiTietHangLuanChuyenReq param, Pageable pageable);
+
+    @Query(value = "SELECT * FROM ChiTietHangHoaLuanChuyen c "
+            + "WHERE 1=1 "
+            + " AND ((:#{#param.thuocId} IS NULL) OR (c.thuocId = :#{#param.thuocId})) "
+            + " AND ((:#{#param.maGiaoDich} IS NULL) OR (c.maGiaoDich = :#{#param.maGiaoDich})) "
+            + " AND ((:#{#param.trangThai} IS NULL) OR (c.trangThai = :#{#param.trangThai})) "
+            + " AND ((:#{#param.maCoSoGui} IS NULL) OR (c.maCoSoGui = :#{#param.maCoSoGui})) "
+            + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "
+            + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})" +
+            " ORDER BY c.id DESC", nativeQuery = true
+    )
+    Page<ChiTietHangHoaLuanChuyen> searchPageGiaoDich(@Param("param") ChiTietHangLuanChuyenReq param, Pageable pageable);
 
     @Query(value = "SELECT * FROM ChiTietHangHoaLuanChuyen c "
             + "WHERE 1=1 "
