@@ -24,13 +24,13 @@ public class ChiTietHangHoaLuanChuyenController {
     @Autowired
     private ChiTietHangHoaLuanChuyenService service;
 
-    @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-lich-su-day-di", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageLichSuDayDi(@RequestBody ChiTietHangLuanChuyenReq objReq) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuDayDi(objReq)));
     }
 
-    @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-lich-su-nhan", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-quan-tam", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageLichSuNhan(@RequestBody ChiTietHangLuanChuyenReq objReq) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuNhan(objReq)));
