@@ -24,8 +24,12 @@ public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanC
             + " AND ((:#{#param.loaiHang} IS NULL) OR (c.loaiHang = :#{#param.loaiHang})) "
             + " AND ((:#{#param.recordStatusId} IS NULL) OR (c.recordStatusId = :#{#param.recordStatusId})) "
             + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "
-            + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})"
-            + " ORDER BY c.id", nativeQuery = true
+            + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})" +
+            " AND (:#{#param.nhomDuocLyId} IS NULL OR c.nhomDuocLyId = :#{#param.nhomDuocLyId}) "+
+            " AND (:#{#param.nhomNganhHangId} IS NULL OR c.nhomNganhHangId = :#{#param.nhomNganhHangId}) "+
+            " AND (:#{#param.nhomHoatChatId} IS NULL OR c.nhomHoatChatId = :#{#param.nhomHoatChatId}) " +
+            " AND (:#{#param.trangThai} IS NULL OR c.trangThai = :#{#param.trangThai}) " +
+            " ORDER BY c.id", nativeQuery = true
     )
     Page<HangHoaLuanChuyen> searchPage(@Param("param") HangHoaLuanChuyenReq param, Pageable pageable);
 
@@ -37,7 +41,10 @@ public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanC
             + " AND ((:#{#param.wardId} IS NULL) OR (c.wardId = :#{#param.wardId})) "
             + " AND ((:#{#param.loaiHang} IS NULL) OR (c.loaiHang = :#{#param.loaiHang})) "
             + " AND ((:#{#param.recordStatusId} IS NULL) OR (c.recordStatusId = :#{#param.recordStatusId})) "
-            + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "
+            + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "+
+            " AND (:#{#param.nhomDuocLyId} IS NULL OR c.nhomDuocLyId = :#{#param.nhomDuocLyId}) "+
+            " AND (:#{#param.nhomNganhHangId} IS NULL OR c.nhomNganhHangId = :#{#param.nhomNganhHangId}) "+
+            " AND (:#{#param.nhomHoatChatId} IS NULL OR c.nhomHoatChatId = :#{#param.nhomHoatChatId}) "
             + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})"
             + " ORDER BY c.id", nativeQuery = true
     )

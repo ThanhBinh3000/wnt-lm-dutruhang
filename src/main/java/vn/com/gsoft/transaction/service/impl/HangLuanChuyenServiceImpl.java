@@ -9,10 +9,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.com.gsoft.transaction.constant.JobContains;
+import vn.com.gsoft.transaction.constant.NotificationContains;
 import vn.com.gsoft.transaction.constant.RecordStatusContains;
+import vn.com.gsoft.transaction.constant.StatusLuanChuyenContains;
 import vn.com.gsoft.transaction.entity.HangHoaLuanChuyen;
 import vn.com.gsoft.transaction.entity.PhieuNhapChiTiets;
 import vn.com.gsoft.transaction.entity.Thuocs;
+import vn.com.gsoft.transaction.model.dto.DataType;
 import vn.com.gsoft.transaction.model.dto.HangHoaLuanChuyenReq;
 import vn.com.gsoft.transaction.model.system.Profile;
 import vn.com.gsoft.transaction.model.system.WrapData;
@@ -80,6 +83,7 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         if(hangLuanChuyens.stream().isParallel()) return false;
         var ids = new ArrayList<Long>();
         hangLuanChuyens.forEach(x->{
+            Optional<Thuocs> thuoc = thuocsRepository.findById(Long.valueOf(x.getThuocThuocId()));
             HangHoaLuanChuyen item = new HangHoaLuanChuyen();
             item.setThuocId(Math.toIntExact(x.getThuocDMCId() > 0 ? x.getThuocDMCId() : x.getThuocThuocId()));
             item.setMaCoSo(userInfo.getMaCoSo());
@@ -99,6 +103,12 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
             item.setRecordStatusId(RecordStatusContains.ACTIVE);
             item.setMaPhieuNhapCT(x.getMaPhieuNhapCt());
             item.setSoLuong(BigDecimal.valueOf(x.getRemainRefQuantity()));
+            item.setTrangThai(StatusLuanChuyenContains.CH0);
+            if(thuoc.isPresent()){
+                item.setNhomNganhHangId(thuoc.get().getNhomNganhHangId());
+                item.setNhomDuocLyId(thuoc.get().getNhomDuocLyId());
+                item.setNhomHoatChatId(thuoc.get().getNhomHoatChatId());
+            }
             hdrRepo.save(item);
             ids.add(item.getId());
             //danh dau hang da luan chuyen
@@ -106,7 +116,7 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
             pn.setHangLuanChuyen(item.getId() > 0);
             phieuNhapChiTietsRepository.save(pn);
         });
-        sendNotification(ids, userInfo.getMaCoSo());
+        sendNotificationCoSoLanCan(ids, userInfo.getMaCoSo());
      return true;
     }
 
@@ -132,19 +142,23 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         return true;
     }
 
-    private void sendNotification(List<Long> ids, String maCoSo) throws ExecutionException, InterruptedException, TimeoutException {
+    private void sendNotificationCoSoLanCan(List<Long> ids, String maCoSo) throws ExecutionException, InterruptedException, TimeoutException {
         int size = ids.size();
         int index = 1;
         UUID uuid = UUID.randomUUID();
         String key = maCoSo;
         String bathKey = uuid.toString();
+        var object = new DataType();
+        object.setType(NotificationContains.THONG_BAO_LIEN_MINH);
+        //object.setIds(ids);
         WrapData data = new WrapData();
         data.setBathKey(bathKey);
         data.setCode(JobContains.THONG_BAO);
         data.setSendDate(new Date());
-        data.setData(ids);
+        data.setData(object);
         data.setIndex(index);
         this.kafkaProducer.sendInternal(topicName, key, new Gson().toJson(data));
     }
+
 
 }

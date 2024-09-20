@@ -28,4 +28,8 @@ public class HangHoaLuanChuyenReq extends BaseRequest {
     private Long regionId;
     private Long citiId;
     private Long wardId;
+    private Integer nhomDuocLyId;
+    private Integer nhomHoatChatId;
+    private Integer nhomNganhHangId;
+    private Integer trangThai;
 }

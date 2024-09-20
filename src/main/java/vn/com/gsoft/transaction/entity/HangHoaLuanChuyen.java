@@ -51,7 +51,15 @@ public class HangHoaLuanChuyen extends BaseEntity {
     private String soDienThoai;
     @Column(name = "MaPhieuNhapCT")
     private Integer maPhieuNhapCT;
+    @Column(name = "TrangThai")
+    private Integer trangThai;
     @Transient
     private String tenThuoc;
+    @Column(name = "NhomHoatChatId")
+    private Integer nhomHoatChatId;
+    @Column(name = "NhomNganhHangId")
+    private Integer nhomNganhHangId;
+    @Column(name = "NhomDuocLyId")
+    private Integer nhomDuocLyId;
 }
 
