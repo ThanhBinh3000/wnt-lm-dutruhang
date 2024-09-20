@@ -132,8 +132,8 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         item.setIdLuanChuyen(req.getIdLuanChuyen());
         item.setTrangThai(StatusLuanChuyenContains.CH0);
-        item.setMaCoSoGui(userInfo.getMaCoSo());
-        item.setMaCoSoNhan(req.getMaCoSoGui());
+        item.setMaCoSoGui(req.getMaCoSoGui());
+        item.setMaCoSoNhan(userInfo.getMaCoSo());
         item.setCreated(new Date());
         item.setCreatedByUserId(userInfo.getId());
         item.setThuocId(req.getThuocId());
