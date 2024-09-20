@@ -222,6 +222,19 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         return true;
     }
 
+    @Override
+    public boolean delete(Long id) throws Exception{
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        Optional<ChiTietHangHoaLuanChuyen> item = hdrRepo.findById(id);
+        if(item.isEmpty()){
+            throw new Exception("Bad request.");
+        }
+        hdrRepo.delete(item.get());
+        return true;
+    }
+
     private void sendNotificationCoSo(Long id, String maCoSoNhan, int type) throws ExecutionException, InterruptedException, TimeoutException {
         var dataType = new DataType();
         Long[] ids = {id};
