@@ -50,16 +50,19 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
     KafkaProducer kafkaProducer;
     @Value("${wnt.kafka.internal.producer.topic.notification}")
     private String topicName;
+    private ThuocsRepository thuocsRepository;
 
     @Autowired
     public ChiTietHangLuanChuyenServiceImpl(ChiTietHangHoaLuanChuyenRepository hdrRepo
                                      , HangHoaLuanChuyenRepository hangHoaLuanChuyenRepository
-                                     , NhaThuocsRepository nhaThuocsRepository
+                                     , NhaThuocsRepository nhaThuocsRepository,
+                                            ThuocsRepository thuocsRepository
     ) {
         super(hdrRepo);
         this.hdrRepo = hdrRepo;
         this.hangHoaLuanChuyenRepository = hangHoaLuanChuyenRepository;
         this.nhaThuocsRepository = nhaThuocsRepository;
+        this.thuocsRepository = thuocsRepository;
     }
 
     @Override
@@ -77,7 +80,10 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         ds.forEach(x->{
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
             if(lc.isPresent()){
-                x.setTenThuoc(lc.get().getTenThuoc());
+                Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
+                if(th.isPresent()){
+                    x.setTenThuoc(th.get().getTenThuoc());
+                }
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
                 x.setTenCoSo("Cơ sở đề xuất");
@@ -107,6 +113,10 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
             NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
             if(lc.isPresent()){
+                Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
+                if(th.isPresent()){
+                    x.setTenThuoc(th.get().getTenThuoc());
+                }
                 x.setTenThuoc(lc.get().getTenThuoc());
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
