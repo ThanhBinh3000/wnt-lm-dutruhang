@@ -32,4 +32,5 @@ public class HangHoaLuanChuyenReq extends BaseRequest {
     private Integer nhomHoatChatId;
     private Integer nhomNganhHangId;
     private Integer trangThai;
+    private Integer[] trangThais;
 }

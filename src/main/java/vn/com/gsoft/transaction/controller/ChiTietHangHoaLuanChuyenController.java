@@ -27,7 +27,7 @@ public class ChiTietHangHoaLuanChuyenController {
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageLichSuDayDi(@RequestBody ChiTietHangLuanChuyenReq objReq) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuDayDi(objReq)));
+        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuGiaoDich(objReq)));
     }
 
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-quan-tam", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -52,5 +52,11 @@ public class ChiTietHangHoaLuanChuyenController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> delete(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.delete(req.getId())));
+    }
+
+    @PostMapping(value = "ket-thuc-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> ketThucGiaoDich(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.ketThucGiaoDich(req)));
     }
 }

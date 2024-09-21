@@ -61,7 +61,8 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         if (userInfo == null)
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
-
+        Integer[] trangThais = {StatusLuanChuyenContains.CH0, StatusLuanChuyenContains.DANG_XU_LY};
+        req.setTrangThais(trangThais);
         var ds = hdrRepo.searchPage(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{

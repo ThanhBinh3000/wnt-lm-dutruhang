@@ -69,6 +69,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
         req.setMaCoSoNhan(userInfo.getMaCoSo());
+        req.setTrangThai(StatusLuanChuyenContains.CH0);
         var ds = hdrRepo.searchPageQuanTam(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
@@ -93,7 +94,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
     }
 
     @Override
-    public Page<ChiTietHangHoaLuanChuyen> searchPageLichSuDayDi(ChiTietHangLuanChuyenReq req) throws Exception {
+    public Page<ChiTietHangHoaLuanChuyen> searchPageLichSuGiaoDich(ChiTietHangLuanChuyenReq req) throws Exception {
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
@@ -127,7 +128,10 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         //kiểm tra xem co so nay da co quan tam chưa
         Optional<ChiTietHangHoaLuanChuyen> ct = hdrRepo.findByIdLuanChuyenAndMaCoSoNhan(req.getIdLuanChuyen(),
                 userInfo.getMaCoSo());
-        if(ct.isPresent()) throw new Exception("Bad request.");
+        if(ct.isPresent()) throw new Exception("Bạn đã quan tâm mặt hàng này.");
+        if(req.getMaCoSoGui() == userInfo.getMaCoSo()){
+            throw new Exception("Bạn không được quan tâm mặt hàng của cơ sở mình");
+        }
 
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         item.setIdLuanChuyen(req.getIdLuanChuyen());
@@ -140,8 +144,19 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         item.setSoLuong(req.getSoLuong());
         hdrRepo.save(item);
         //gui thong bao
-        sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.YEU_CAU_THONG_TIN);
+        //sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.YEU_CAU_THONG_TIN);
         return item;
+    }
+
+    @Override
+    public boolean sendNotificationConfirmCoSo(List<ChiTietHangHoaLuanChuyen> items) throws Exception{
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        for (var x = 0 ; x< items.size(); x ++){
+            sendNotificationCoSo(Long.valueOf(items.get(x).getId()), items.get(x).getMaCoSoNhan(), NotificationContains.YEU_CAU_THONG_TIN);
+        }
+        return true;
     }
 
     @Override
@@ -168,6 +183,39 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             HangHoaLuanChuyen hh = new HangHoaLuanChuyen();
             BeanUtils.copyProperties(hangLuanChuyen.get(), hh);
             hh.setTrangThai(StatusLuanChuyenContains.DANG_XU_LY);
+            hangHoaLuanChuyenRepository.save(hh);
+        }
+        sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.PHAN_HOI_THONG_TIN);
+        return true;
+    }
+
+    @Override
+    public boolean ketThucGiaoDich(ChiTietHangLuanChuyenReq req) throws Exception{
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        //kiểm tra xem co so nay da co quan tam chưa
+        Optional<ChiTietHangHoaLuanChuyen> ct = hdrRepo.findById(req.getId());
+        if(ct.isEmpty()) throw new Exception("Bad request.");
+        if(ct.get().getTrangThai() != StatusLuanChuyenContains.DANG_XU_LY){
+            throw new Exception("Hàng hoá này chưa giao dịch bạn không được phép hoàn thành giao dịch.");
+        }
+        ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
+        BeanUtils.copyProperties(ct.get(), item);
+        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+        item.setMaGiaoDich(maGD);
+        Date in = new Date();
+        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+        item.setThoiHan(expDate);
+        item.setTrangThai(StatusLuanChuyenContains.DA_XU_LY);
+        hdrRepo.save(item);
+        //cập nhật lại trạng thái
+        Optional<HangHoaLuanChuyen> hangLuanChuyen = hangHoaLuanChuyenRepository.findById(Long.valueOf(item.getIdLuanChuyen()));
+        if(hangLuanChuyen.isPresent()){
+            HangHoaLuanChuyen hh = new HangHoaLuanChuyen();
+            BeanUtils.copyProperties(hangLuanChuyen.get(), hh);
+            hh.setTrangThai(StatusLuanChuyenContains.DA_XU_LY);
             hangHoaLuanChuyenRepository.save(hh);
         }
         sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.PHAN_HOI_THONG_TIN);
