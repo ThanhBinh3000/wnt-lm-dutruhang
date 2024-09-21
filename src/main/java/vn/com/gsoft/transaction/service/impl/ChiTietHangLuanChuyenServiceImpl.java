@@ -71,6 +71,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         req.setMaCoSoNhan(userInfo.getMaCoSo());
         Integer[] trangThais = {StatusLuanChuyenContains.QUAN_TAM,
                 StatusLuanChuyenContains.CH0_PHAN_HOI, StatusLuanChuyenContains.YEU_CAU_TU_CHOI};
+        req.setTrangThais(trangThais);
         var ds = hdrRepo.searchPageQuanTam(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
@@ -98,6 +99,8 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         Integer[] trangThais = {StatusLuanChuyenContains.DA_XU_LY, StatusLuanChuyenContains.DANG_XU_LY};
         Integer[] trangThai1s = {StatusLuanChuyenContains.DA_XU_LY, StatusLuanChuyenContains.DANG_XU_LY,
                 StatusLuanChuyenContains.CH0_PHAN_HOI};
+        req.setTrangThai1s(trangThai1s);
+        req.setTrangThais(trangThais);
         var ds = hdrRepo.searchPageGiaoDich(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
