@@ -81,9 +81,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
             if(lc.isPresent()){
                 Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
-                if(th.isPresent()){
-                    x.setTenThuoc(th.get().getTenThuoc());
-                }
+                th.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
                 x.setTenCoSo("Cơ sở đề xuất");
@@ -114,9 +112,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
             if(lc.isPresent()){
                 Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
-                if(th.isPresent()){
-                    x.setTenThuoc(th.get().getTenThuoc());
-                }
+                th.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
                 x.setTenThuoc(lc.get().getTenThuoc());
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
