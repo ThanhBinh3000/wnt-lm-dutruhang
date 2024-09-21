@@ -21,4 +21,5 @@ public class ChiTietHangLuanChuyenReq extends BaseRequest {
     private BigDecimal soLuong;
     private Integer[] trangThais;
     private Integer[] trangThai1s;
+    private String ghiChu;
 }

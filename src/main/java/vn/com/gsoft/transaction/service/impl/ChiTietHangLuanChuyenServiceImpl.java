@@ -69,7 +69,8 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
         req.setMaCoSoNhan(userInfo.getMaCoSo());
-        req.setTrangThai(StatusLuanChuyenContains.QUAN_TAM);
+        Integer[] trangThais = {StatusLuanChuyenContains.QUAN_TAM,
+                StatusLuanChuyenContains.CH0_PHAN_HOI, StatusLuanChuyenContains.YEU_CAU_TU_CHOI};
         var ds = hdrRepo.searchPageQuanTam(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
@@ -162,7 +163,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
     }
 
     @Override
-    public boolean updateInfo(ChiTietHangLuanChuyenReq req) throws Exception{
+    public boolean dongY(ChiTietHangLuanChuyenReq req) throws Exception{
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
@@ -185,6 +186,36 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
             HangHoaLuanChuyen hh = new HangHoaLuanChuyen();
             BeanUtils.copyProperties(hangLuanChuyen.get(), hh);
             hh.setTrangThai(StatusLuanChuyenContains.DANG_XU_LY);
+            hangHoaLuanChuyenRepository.save(hh);
+        }
+        sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.PHAN_HOI_THONG_TIN);
+        return true;
+    }
+
+    @Override
+    public boolean tuChoi(ChiTietHangLuanChuyenReq req) throws Exception{
+        Profile userInfo = this.getLoggedUser();
+        if (userInfo == null)
+            throw new Exception("Bad request.");
+        //kiểm tra xem co so nay da co quan tam chưa
+        Optional<ChiTietHangHoaLuanChuyen> ct = hdrRepo.findById(req.getId());
+        if(ct.isEmpty()) throw new Exception("Bad request.");
+        ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
+        BeanUtils.copyProperties(ct.get(), item);
+        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+        item.setMaGiaoDich(maGD);
+        Date in = new Date();
+        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+        item.setThoiHan(expDate);
+        item.setTrangThai(StatusLuanChuyenContains.YEU_CAU_TU_CHOI);
+        hdrRepo.save(item);
+        //cập nhật lại trạng thái
+        Optional<HangHoaLuanChuyen> hangLuanChuyen = hangHoaLuanChuyenRepository.findById(Long.valueOf(item.getIdLuanChuyen()));
+        if(hangLuanChuyen.isPresent()){
+            HangHoaLuanChuyen hh = new HangHoaLuanChuyen();
+            BeanUtils.copyProperties(hangLuanChuyen.get(), hh);
+            hh.setTrangThai(StatusLuanChuyenContains.QUAN_TAM);
             hangHoaLuanChuyenRepository.save(hh);
         }
         sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.PHAN_HOI_THONG_TIN);

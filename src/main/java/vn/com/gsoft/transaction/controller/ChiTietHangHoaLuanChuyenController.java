@@ -42,10 +42,16 @@ public class ChiTietHangHoaLuanChuyenController {
         return ResponseEntity.ok(ResponseUtils.ok(service.create(objReq)));
     }
 
-    @PostMapping(value = PathConstant.URL_UPDATE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PathConstant.URL_UPDATE+"-dong-y", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<BaseResponse> update(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.updateInfo(req)));
+    public ResponseEntity<BaseResponse> dongY(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.dongY(req)));
+    }
+
+    @PostMapping(value = PathConstant.URL_UPDATE+"-dong-y", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> tuChoi(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.tuChoi(req)));
     }
 
     @PostMapping(value = PathConstant.URL_DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

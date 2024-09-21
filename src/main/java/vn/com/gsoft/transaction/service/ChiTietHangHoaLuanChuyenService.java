@@ -12,7 +12,8 @@ import java.util.List;
 public interface ChiTietHangHoaLuanChuyenService extends BaseService<ChiTietHangHoaLuanChuyen, ChiTietHangLuanChuyenReq, Long>{
     Page<ChiTietHangHoaLuanChuyen> searchPageLichSuGiaoDich(ChiTietHangLuanChuyenReq req) throws Exception;
     Page<ChiTietHangHoaLuanChuyen> searchPageLichSuNhan(ChiTietHangLuanChuyenReq req) throws Exception;
-    boolean updateInfo(ChiTietHangLuanChuyenReq req) throws Exception;
+    boolean dongY(ChiTietHangLuanChuyenReq req) throws Exception;
+    boolean tuChoi(ChiTietHangLuanChuyenReq req) throws Exception;
     boolean cancelGD(ChiTietHangLuanChuyenReq req) throws Exception;
     boolean confirmGD(ChiTietHangLuanChuyenReq req) throws Exception;
     boolean ketThucGiaoDich(ChiTietHangLuanChuyenReq req) throws Exception;

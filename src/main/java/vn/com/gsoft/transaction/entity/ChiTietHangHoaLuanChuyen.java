@@ -38,6 +38,8 @@ public class ChiTietHangHoaLuanChuyen extends BaseEntity {
     private Integer idLuanChuyen;
     @Column(name = "ThoiHan")
     private Date thoiHan;
+    @Column(name = "GhiChu")
+    private String ghiChu;
     @Transient
     private String tenCoSo;
     @Transient
@@ -55,7 +57,10 @@ public class ChiTietHangHoaLuanChuyen extends BaseEntity {
     public String getTrangThaiTxt(){
         var val = "";
         if(trangThai != null){
-            if(trangThai == StatusLuanChuyenContains.CH0){
+            if(trangThai == StatusLuanChuyenContains.QUAN_TAM){
+                val = "Quan tâm";
+            }
+            if(trangThai == StatusLuanChuyenContains.CH0_PHAN_HOI){
                 val = "Chờ xác nhận";
             }
             else if(trangThai == StatusLuanChuyenContains.DANG_XU_LY){
@@ -63,6 +68,8 @@ public class ChiTietHangHoaLuanChuyen extends BaseEntity {
             }
             else if(trangThai == StatusLuanChuyenContains.DA_XU_LY){
                 val = "Giao Dịch Hoàn Tất";
+            } else  if(trangThai == StatusLuanChuyenContains.YEU_CAU_TU_CHOI){
+                val = "Yêu cầu bị từ chối";
             }
         }
         return val;
