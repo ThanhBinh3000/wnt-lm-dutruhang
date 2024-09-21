@@ -16,6 +16,6 @@ public interface ChiTietHangHoaLuanChuyenService extends BaseService<ChiTietHang
     boolean cancelGD(ChiTietHangLuanChuyenReq req) throws Exception;
     boolean confirmGD(ChiTietHangLuanChuyenReq req) throws Exception;
     boolean ketThucGiaoDich(ChiTietHangLuanChuyenReq req) throws Exception;
-    boolean sendNotificationConfirmCoSo(List<ChiTietHangHoaLuanChuyen> items) throws Exception;
+    boolean sendNotificationConfirmCoSo(List<ChiTietHangLuanChuyenReq> items) throws Exception;
 }
 

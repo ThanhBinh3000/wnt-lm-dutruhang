@@ -59,4 +59,10 @@ public class ChiTietHangHoaLuanChuyenController {
     public ResponseEntity<BaseResponse> ketThucGiaoDich(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.ketThucGiaoDich(req)));
     }
+
+    @PostMapping(value = "gui-thong-bao", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> guiThongBao(@RequestBody List<ChiTietHangLuanChuyenReq> req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.sendNotificationConfirmCoSo(req)));
+    }
 }

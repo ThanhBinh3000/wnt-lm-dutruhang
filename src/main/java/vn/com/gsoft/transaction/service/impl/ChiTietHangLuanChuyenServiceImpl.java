@@ -149,7 +149,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
     }
 
     @Override
-    public boolean sendNotificationConfirmCoSo(List<ChiTietHangHoaLuanChuyen> items) throws Exception{
+    public boolean sendNotificationConfirmCoSo(List<ChiTietHangLuanChuyenReq> items) throws Exception{
         Profile userInfo = this.getLoggedUser();
         if (userInfo == null)
             throw new Exception("Bad request.");
