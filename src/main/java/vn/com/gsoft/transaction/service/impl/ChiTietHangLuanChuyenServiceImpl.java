@@ -252,14 +252,14 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
         Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
         item.setThoiHan(expDate);
-        item.setTrangThai(req.isThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.THAT_BAI);
+        item.setTrangThai(req.getThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.THAT_BAI);
         hdrRepo.save(item);
         //cập nhật lại trạng thái
         Optional<HangHoaLuanChuyen> hangLuanChuyen = hangHoaLuanChuyenRepository.findById(Long.valueOf(item.getIdLuanChuyen()));
         if(hangLuanChuyen.isPresent()){
             HangHoaLuanChuyen hh = new HangHoaLuanChuyen();
             BeanUtils.copyProperties(hangLuanChuyen.get(), hh);
-            hh.setTrangThai(req.isThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.QUAN_TAM);
+            hh.setTrangThai(req.getThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.QUAN_TAM);
             hangHoaLuanChuyenRepository.save(hh);
         }
         //sendNotificationCoSo(Long.valueOf(item.getId()), item.getMaCoSoNhan(), NotificationContains.PHAN_HOI_THONG_TIN);
