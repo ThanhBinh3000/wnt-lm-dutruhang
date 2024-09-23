@@ -33,7 +33,7 @@ public interface ChiTietHangHoaLuanChuyenRepository extends BaseRepository<ChiTi
             + "WHERE 1=1 "
             + " AND ((:#{#param.thuocId} IS NULL) OR (c.thuocId = :#{#param.thuocId})) "
             + " AND ((:#{#param.maGiaoDich} IS NULL) OR (c.maGiaoDich = :#{#param.maGiaoDich})) "
-            + " AND ((:#{#param.trangThai} IS NULL) OR (c.trangThai = :#{#param.trangThai})) "
+            + " AND (c.trangThai in (:#{#param.trangThais}))"
             + " AND ((:#{#param.maCoSoNhan} IS NULL) OR (c.maCoSoNhan = :#{#param.maCoSoNhan})) "
             + " AND (:#{#param.fromDate} IS NULL OR c.created >= :#{#param.fromDate}) "
             + " AND (:#{#param.toDate} IS NULL OR c.created <= :#{#param.toDate})" +
