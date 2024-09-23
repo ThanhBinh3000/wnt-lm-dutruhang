@@ -27,7 +27,7 @@ public class ChiTietHangHoaLuanChuyenController {
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> searchPageLichSuDayDi(@RequestBody ChiTietHangLuanChuyenReq objReq) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuDayDi(objReq)));
+        return ResponseEntity.ok(ResponseUtils.ok(service.searchPageLichSuGiaoDich(objReq)));
     }
 
     @PostMapping(value = PathConstant.URL_SEARCH_PAGE + "-hang-quan-tam", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -42,15 +42,33 @@ public class ChiTietHangHoaLuanChuyenController {
         return ResponseEntity.ok(ResponseUtils.ok(service.create(objReq)));
     }
 
-    @PostMapping(value = PathConstant.URL_UPDATE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PathConstant.URL_UPDATE+"-dong-y", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<BaseResponse> update(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
-        return ResponseEntity.ok(ResponseUtils.ok(service.updateInfo(req)));
+    public ResponseEntity<BaseResponse> dongY(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.dongY(req)));
+    }
+
+    @PostMapping(value = PathConstant.URL_UPDATE+"-tu-choi", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> tuChoi(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.tuChoi(req)));
     }
 
     @PostMapping(value = PathConstant.URL_DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BaseResponse> delete(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
         return ResponseEntity.ok(ResponseUtils.ok(service.delete(req.getId())));
+    }
+
+    @PostMapping(value = "ket-thuc-giao-dich", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> ketThucGiaoDich(@RequestBody ChiTietHangLuanChuyenReq req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.ketThucGiaoDich(req)));
+    }
+
+    @PostMapping(value = "gui-thong-bao", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<BaseResponse> guiThongBao(@RequestBody List<ChiTietHangLuanChuyenReq> req) throws Exception {
+        return ResponseEntity.ok(ResponseUtils.ok(service.sendNotificationConfirmCoSo(req)));
     }
 }

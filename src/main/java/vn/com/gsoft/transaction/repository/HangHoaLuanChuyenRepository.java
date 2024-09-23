@@ -28,7 +28,7 @@ public interface HangHoaLuanChuyenRepository extends BaseRepository<HangHoaLuanC
             " AND (:#{#param.nhomDuocLyId} IS NULL OR c.nhomDuocLyId = :#{#param.nhomDuocLyId}) "+
             " AND (:#{#param.nhomNganhHangId} IS NULL OR c.nhomNganhHangId = :#{#param.nhomNganhHangId}) "+
             " AND (:#{#param.nhomHoatChatId} IS NULL OR c.nhomHoatChatId = :#{#param.nhomHoatChatId}) " +
-            " AND (:#{#param.trangThai} IS NULL OR c.trangThai = :#{#param.trangThai}) " +
+            " AND (c.trangThai in (:#{#param.trangThais})) " +
             " ORDER BY c.id", nativeQuery = true
     )
     Page<HangHoaLuanChuyen> searchPage(@Param("param") HangHoaLuanChuyenReq param, Pageable pageable);

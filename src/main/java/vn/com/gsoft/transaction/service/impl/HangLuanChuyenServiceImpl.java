@@ -61,14 +61,17 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         if (userInfo == null)
             throw new Exception("Bad request.");
         Pageable pageable = PageRequest.of(req.getPaggingReq().getPage(), req.getPaggingReq().getLimit());
-
+        Integer[] trangThais = {StatusLuanChuyenContains.QUAN_TAM, StatusLuanChuyenContains.DANG_XU_LY};
+        req.setTrangThais(trangThais);
         var ds = hdrRepo.searchPage(req, pageable);
         //gán thông tin thuốc
         ds.forEach(x->{
             Optional<Thuocs> thuoc = thuocsRepository.findById(Long.valueOf(x.getThuocId()));
             thuoc.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
-            x.setTenCoSo("Cơ sở đề xuất");
-            x.setDiaChi("***");
+            if(x.getMaCoSo() != userInfo.getMaCoSo()){
+                x.setTenCoSo("Cơ sở đề xuất");
+                x.setDiaChi("***");
+            }
         });
 
         return ds;
@@ -103,7 +106,7 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
             item.setRecordStatusId(RecordStatusContains.ACTIVE);
             item.setMaPhieuNhapCT(x.getMaPhieuNhapCt());
             item.setSoLuong(BigDecimal.valueOf(x.getRemainRefQuantity()));
-            item.setTrangThai(StatusLuanChuyenContains.CH0);
+            item.setTrangThai(StatusLuanChuyenContains.QUAN_TAM);
             if(thuoc.isPresent()){
                 item.setNhomNganhHangId(thuoc.get().getNhomNganhHangId());
                 item.setNhomDuocLyId(thuoc.get().getNhomDuocLyId());
