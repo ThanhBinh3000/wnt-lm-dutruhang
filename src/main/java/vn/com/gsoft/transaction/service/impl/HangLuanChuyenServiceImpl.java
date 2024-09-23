@@ -68,8 +68,10 @@ public class HangLuanChuyenServiceImpl extends BaseServiceImpl<HangHoaLuanChuyen
         ds.forEach(x->{
             Optional<Thuocs> thuoc = thuocsRepository.findById(Long.valueOf(x.getThuocId()));
             thuoc.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
-            x.setTenCoSo("Cơ sở đề xuất");
-            x.setDiaChi("***");
+            if(x.getMaCoSo() != userInfo.getMaCoSo()){
+                x.setTenCoSo("Cơ sở đề xuất");
+                x.setDiaChi("***");
+            }
         });
 
         return ds;
