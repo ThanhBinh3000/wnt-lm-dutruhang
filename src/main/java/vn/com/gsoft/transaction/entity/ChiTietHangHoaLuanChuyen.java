@@ -53,6 +53,8 @@ public class ChiTietHangHoaLuanChuyen extends BaseEntity {
     @Transient
     private Date hanDung;
     @Transient
+    private String tenDonVi;
+    @Transient
     private String trangThaiTxt;
     public String getTrangThaiTxt(){
         var val = "";
@@ -70,6 +72,9 @@ public class ChiTietHangHoaLuanChuyen extends BaseEntity {
                 val = "Giao Dịch Hoàn Tất";
             } else  if(trangThai == StatusLuanChuyenContains.YEU_CAU_TU_CHOI){
                 val = "Yêu cầu bị từ chối";
+            }
+            else  if(trangThai == StatusLuanChuyenContains.THAT_BAI){
+                val = "Giao dịch thất bại";
             }
         }
         return val;
