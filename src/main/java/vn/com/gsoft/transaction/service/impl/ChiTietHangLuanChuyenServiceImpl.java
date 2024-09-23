@@ -111,19 +111,32 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         //gán thông tin thuốc
         ds.forEach(x->{
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
-            NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
+
             if(lc.isPresent()){
                 Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
                 th.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
                 x.setTenDonVi(lc.get().getTenDonVi());
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
+                if(Objects.equals(x.getMaCoSoGui(), lc.get().getMaCoSo())
+                        && Objects.equals(userInfo.getMaCoSo(), lc.get().getMaCoSo())){
+                    NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
+                    if(nhaThuoc != null){
+                        x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
+                        x.setDiaChi(nhaThuoc.getDiaChi());
+                        x.setSoDienThoai(nhaThuoc.getDienThoai());
+                    }
+                }else {
+                    NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoGui());
+                    if(nhaThuoc != null){
+                        x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
+                        x.setDiaChi(nhaThuoc.getDiaChi());
+                        x.setSoDienThoai(nhaThuoc.getDienThoai());
+                    }
+                }
+
             }
-            if(nhaThuoc != null){
-                x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
-                x.setDiaChi(nhaThuoc.getDiaChi());
-                x.setSoDienThoai(nhaThuoc.getDienThoai());
-            }
+
         });
 
         return ds;
@@ -213,12 +226,6 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         if(ct.isEmpty()) throw new Exception("Bad request.");
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         BeanUtils.copyProperties(ct.get(), item);
-        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
-        item.setMaGiaoDich(maGD);
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        item.setThoiHan(expDate);
         item.setTrangThai(StatusLuanChuyenContains.YEU_CAU_TU_CHOI);
         hdrRepo.save(item);
         //cập nhật lại trạng thái
@@ -246,12 +253,6 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         }
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         BeanUtils.copyProperties(ct.get(), item);
-        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
-        item.setMaGiaoDich(maGD);
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        item.setThoiHan(expDate);
         item.setTrangThai(req.getThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.THAT_BAI);
         hdrRepo.save(item);
         //cập nhật lại trạng thái
