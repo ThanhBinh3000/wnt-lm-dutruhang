@@ -213,12 +213,6 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         if(ct.isEmpty()) throw new Exception("Bad request.");
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         BeanUtils.copyProperties(ct.get(), item);
-        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
-        item.setMaGiaoDich(maGD);
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        item.setThoiHan(expDate);
         item.setTrangThai(StatusLuanChuyenContains.YEU_CAU_TU_CHOI);
         hdrRepo.save(item);
         //cập nhật lại trạng thái
@@ -246,12 +240,6 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         }
         ChiTietHangHoaLuanChuyen item = new ChiTietHangHoaLuanChuyen();
         BeanUtils.copyProperties(ct.get(), item);
-        var maGD = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
-        item.setMaGiaoDich(maGD);
-        Date in = new Date();
-        LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-        Date expDate = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        item.setThoiHan(expDate);
         item.setTrangThai(req.getThanhCong() ? StatusLuanChuyenContains.DA_XU_LY : StatusLuanChuyenContains.THAT_BAI);
         hdrRepo.save(item);
         //cập nhật lại trạng thái
