@@ -151,7 +151,7 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         Optional<ChiTietHangHoaLuanChuyen> ct = hdrRepo.findByIdLuanChuyenAndMaCoSoNhan(req.getIdLuanChuyen(),
                 userInfo.getMaCoSo());
         if(ct.isPresent()) throw new Exception("Bạn đã quan tâm mặt hàng này.");
-        if(req.getMaCoSoGui() == userInfo.getMaCoSo()){
+        if(Objects.equals(req.getMaCoSoGui(), userInfo.getMaCoSo())){
             throw new Exception("Bạn không được quan tâm mặt hàng của cơ sở mình");
         }
 
