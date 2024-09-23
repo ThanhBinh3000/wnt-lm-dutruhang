@@ -111,19 +111,32 @@ public class ChiTietHangLuanChuyenServiceImpl extends BaseServiceImpl<ChiTietHan
         //gán thông tin thuốc
         ds.forEach(x->{
             Optional<HangHoaLuanChuyen> lc = hangHoaLuanChuyenRepository.findById(Long.valueOf(x.getIdLuanChuyen()));
-            NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
+
             if(lc.isPresent()){
                 Optional<Thuocs> th = thuocsRepository.findById(Long.valueOf(lc.get().getThuocId()));
                 th.ifPresent(thuocs -> x.setTenThuoc(thuocs.getTenThuoc()));
                 x.setTenDonVi(lc.get().getTenDonVi());
                 x.setSoLo(lc.get().getSoLo());
                 x.setHanDung(lc.get().getHanDung());
+                if(Objects.equals(x.getMaCoSoGui(), lc.get().getMaCoSo())
+                        && Objects.equals(userInfo.getMaCoSo(), lc.get().getMaCoSo())){
+                    NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoNhan());
+                    if(nhaThuoc != null){
+                        x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
+                        x.setDiaChi(nhaThuoc.getDiaChi());
+                        x.setSoDienThoai(nhaThuoc.getDienThoai());
+                    }
+                }else {
+                    NhaThuocs nhaThuoc = nhaThuocsRepository.findByMaNhaThuoc(x.getMaCoSoGui());
+                    if(nhaThuoc != null){
+                        x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
+                        x.setDiaChi(nhaThuoc.getDiaChi());
+                        x.setSoDienThoai(nhaThuoc.getDienThoai());
+                    }
+                }
+
             }
-            if(nhaThuoc != null){
-                x.setTenCoSo(nhaThuoc.getTenNhaThuoc());
-                x.setDiaChi(nhaThuoc.getDiaChi());
-                x.setSoDienThoai(nhaThuoc.getDienThoai());
-            }
+
         });
 
         return ds;
